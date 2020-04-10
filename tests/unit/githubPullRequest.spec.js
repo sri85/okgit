@@ -16,9 +16,9 @@ import {
     updatePullRequestClosedMocks,
     updatePullRequestOpenMocks,
 } from "./mocks/pull_requests/updatedPullRequestMocks";
-import { GithubPullRequest } from "../lib/api/services/github/pull_requests/GithubPullRequest.js";
-import { org, token } from "../lib/configManager/parseConfig.js";
-import createAPIBaseURL from "../lib/utils/helpers";
+import { GithubPullRequest } from "../../lib/api/services/github/pull_requests/GithubPullRequest.js";
+import { org, token } from "../../lib/configManager/parseConfig.js";
+import createAPIBaseURL from "../../lib/utils/helpers";
 import { listPullRequestMissingCreatedAtResponse } from "./mocks/pull_requests/listPullRequestsMocks";
 
 describe("GitHubPullRequests", () => {
@@ -31,7 +31,7 @@ describe("GitHubPullRequests", () => {
 
     describe("getPullRequests", () => {
         const pullRequestURL =
-            "/repos/getndazn/playback-web-player/pulls?state=open";
+            "/repos/octo/playback-web-player/pulls?state=open";
         xit("should return pr link ,state ,username and the date when PR was raised when the API returns 200 ", async () => {
             nock(API_BASE_URL, {
                 authorization: `token ${token}`,
@@ -40,15 +40,15 @@ describe("GitHubPullRequests", () => {
                 .reply(200, listPullRequestsMocks);
             const expectedResult = [
                 [
-                    "https://github.com/getndazn/dapact/pull/43",
+                    "https://github.com/octo/test/pull/43",
                     "open",
-                    "sripathipai",
+                    "sri85",
                     "12 days ago",
                 ],
                 [
-                    "https://github.com/getndazn/dapact/pull/23",
+                    "https://github.com/octo/test/pull/23",
                     "open",
-                    "sripathipai",
+                    "sri85",
                     "5 months ago",
                 ],
             ];
@@ -106,7 +106,7 @@ describe("GitHubPullRequests", () => {
             nock(API_BASE_URL, {
                 authorization: `token ${token}`,
             })
-                .get("/repos/getndazn/playback-web-player/pulls?state=open")
+                .get("/repos/octo/playback-web-player/pulls?state=open")
                 .reply(200, listPullRequestMissingUserResponse);
 
             expect(
@@ -146,7 +146,7 @@ describe("GitHubPullRequests", () => {
         });
     });
     describe("getPullRequest", async () => {
-        const pullRequestIdUrl = "/repos/getndazn/dapact/pulls/12";
+        const pullRequestIdUrl = "/repos/octo/test/pulls/12";
         it("should return an empty array when the response is empty ", async () => {
             nock(API_BASE_URL, {
                 authorization: `token ${token}`,
@@ -191,7 +191,7 @@ describe("GitHubPullRequests", () => {
         });
     });
     describe("getPullRequestFiles", async () => {
-        const FILES_ENDPOINT_URL = "/repos/getndazn/dapact/pulls/12/files";
+        const FILES_ENDPOINT_URL = "/repos/octo/test/pulls/12/files";
         it("should return an empty array if the files endpoint returns 400", async () => {
             nock(API_BASE_URL, {
                 authorization: `token ${token}`,
@@ -236,7 +236,7 @@ describe("GitHubPullRequests", () => {
             nock(API_BASE_URL, {
                 authorization: `token ${token}`,
             })
-                .get("/repos/getndazn/dapact/pulls/12/files")
+                .get("/repos/octo/test/pulls/12/files")
                 .reply(200, pullrequestFilesMocks);
             expect(
                 await pullRequestObject.showPullRequestFiles(12)
@@ -244,7 +244,7 @@ describe("GitHubPullRequests", () => {
         });
     });
     describe("showPullRequestCommits", async () => {
-        const COMMITS_ENDPOINT_URL = "/repos/getndazn/dapact/pulls/12/commits";
+        const COMMITS_ENDPOINT_URL = "/repos/octo/test/pulls/12/commits";
         it("should return empty if the commits endpoint returns an empty response ", async () => {
             nock(API_BASE_URL, {
                 authorization: `token ${token}`,
@@ -283,9 +283,9 @@ describe("GitHubPullRequests", () => {
                 .reply(200, pullRequestCommitsMocks);
             const expectedResult = [
                 [
-                    "sripathipai",
+                    "sri85",
                     "test commit",
-                    "https://github.com/getndazn/dapact/commit/168c42f4cda8933fbe5ce728c7bb34289fa08304",
+                    "https://github.com/octo/test/commit/168c42f4cda8933fbe5ce728c7bb34289fa08304",
                 ],
             ];
 
@@ -295,7 +295,7 @@ describe("GitHubPullRequests", () => {
         });
     });
     describe("updatePullRequestStatus", async () => {
-        const updatePullRequestUrl = "/repos/getndazn/dapact/pulls/12";
+        const updatePullRequestUrl = "/repos/octo/test/pulls/12";
 
         it("should be able to close the pull request", async () => {
             nock(API_BASE_URL, {
@@ -356,8 +356,7 @@ describe("GitHubPullRequests", () => {
         });
     });
     describe("Add reviewers", async () => {
-        const addReviewersUrl =
-            "/repos/getndazn/dapact/pulls/43/requested_reviewers";
+        const addReviewersUrl = "/repos/octo/test/pulls/43/requested_reviewers";
         it("should return an empty array if it reviewers api returns 500", async () => {
             nock(API_BASE_URL, {
                 reqheaders: {
@@ -365,11 +364,11 @@ describe("GitHubPullRequests", () => {
                 },
             })
                 .post(addReviewersUrl, {
-                    reviewers: ["geeaqui"],
+                    reviewers: ["sri85"],
                 })
                 .reply(500, {});
             expect(
-                await pullRequestObject.addReviewers(43, ["geeaqui"])
+                await pullRequestObject.addReviewers(43, ["sri85"])
             ).to.deep.equal([]);
         });
         it("should return an empty array if it reviewers api returns 400", async () => {
@@ -379,11 +378,11 @@ describe("GitHubPullRequests", () => {
                 },
             })
                 .post(addReviewersUrl, {
-                    reviewers: ["geeaqui"],
+                    reviewers: ["sri85"],
                 })
                 .reply(400, {});
             expect(
-                await pullRequestObject.addReviewers(43, ["geeaqui"])
+                await pullRequestObject.addReviewers(43, ["sri85"])
             ).to.deep.equal([]);
         });
         it("should return an empty array if it reviewers api returns an empty response", async () => {
@@ -393,11 +392,11 @@ describe("GitHubPullRequests", () => {
                 },
             })
                 .post(addReviewersUrl, {
-                    reviewers: ["geeaqui"],
+                    reviewers: ["sri85"],
                 })
                 .reply(200, {});
             expect(
-                await pullRequestObject.addReviewers(43, ["geeaqui"])
+                await pullRequestObject.addReviewers(43, ["sri85"])
             ).to.deep.equal([]);
         });
         it("should return an empty array if it", async () => {
@@ -407,19 +406,19 @@ describe("GitHubPullRequests", () => {
                 },
             })
                 .post(addReviewersUrl, {
-                    reviewers: ["geeaqui"],
+                    reviewers: ["sri85"],
                 })
                 .reply(201, pullRequestAddReviewersMocks);
             expect(
-                await pullRequestObject.addReviewers(43, ["geeaqui"])
-            ).to.deep.equal(["geeaqui"]);
+                await pullRequestObject.addReviewers(43, ["sri85"])
+            ).to.deep.equal(["sri85"]);
         });
     });
     describe("Remove reviewers", async () => {
         const REMOVE_REVIEWERS_URL =
-            "/repos/getndazn/dapact/pulls/43/requested_reviewers";
+            "/repos/octo/test/pulls/43/requested_reviewers";
         const reviewers = {
-            reviewers: ["geeaqui"],
+            reviewers: ["sri85"],
         };
         it("should return empty array if the remove reviewers endpoint returns 500", async () => {
             nock(API_BASE_URL, {
@@ -430,7 +429,7 @@ describe("GitHubPullRequests", () => {
                 .delete(REMOVE_REVIEWERS_URL, reviewers)
                 .reply(200, {});
             expect(
-                await pullRequestObject.removeReviewers(43, ["geeaqui"])
+                await pullRequestObject.removeReviewers(43, ["sri85"])
             ).to.deep.equal([]);
         });
         it("should return empty array if the remove reviewers endpoint returns 500", async () => {
@@ -442,7 +441,7 @@ describe("GitHubPullRequests", () => {
                 .delete(REMOVE_REVIEWERS_URL, reviewers)
                 .reply(500);
             expect(
-                await pullRequestObject.removeReviewers(43, ["geeaqui"])
+                await pullRequestObject.removeReviewers(43, ["sri85"])
             ).to.deep.equal([]);
         });
         it("should return empty array if the remove reviewers endpoint returns 400", async () => {
@@ -454,7 +453,7 @@ describe("GitHubPullRequests", () => {
                 .delete(REMOVE_REVIEWERS_URL, reviewers)
                 .reply(400);
             expect(
-                await pullRequestObject.removeReviewers(43, ["geeaqui"])
+                await pullRequestObject.removeReviewers(43, ["sri85"])
             ).to.deep.equal([]);
         });
     });

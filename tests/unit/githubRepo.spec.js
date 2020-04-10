@@ -1,9 +1,9 @@
 import { describe, it, afterEach } from "mocha";
 import nock from "nock";
 import { expect } from "chai";
-import { GithubRepo } from "../lib/api/services/github/repos/GithubRepo";
-import createAPIBaseURL from "../lib/utils/helpers";
-import { org, token } from "../lib/configManager/parseConfig";
+import { GithubRepo } from "../../lib/api/services/github/repos/GithubRepo";
+import createAPIBaseURL from "../../lib/utils/helpers";
+import { org, token } from "../../lib/configManager/parseConfig";
 
 describe("Github Repo API", async () => {
     const API_BASE_URL = "https://api.github.com";
@@ -19,8 +19,8 @@ describe("Github Repo API", async () => {
     };
     const mockResponse = {
         full_name: "test-repo",
-        html_url: "https://github.com/octo/test-repo",
-        ssh_url: "git@github.com:octo/test-repo.git",
+        html_url: "https://github.com/octo/test",
+        ssh_url: "git@github.com:octo/test.git",
         forks: 23,
         open_issues: 0,
         stargazers_count: 45,
@@ -32,8 +32,8 @@ describe("Github Repo API", async () => {
     const expectedResponse = [
         [
             "test-repo",
-            "https://github.com/octo/test-repo",
-            "git@github.com:octo/test-repo.git",
+            "https://github.com/octo/test",
+            "git@github.com:octo/test.git",
             23,
             0,
             45,
@@ -74,11 +74,11 @@ describe("Github Repo API", async () => {
                     authorization: `token ${token}`,
                 },
             })
-                .get("/repos/getndazn/dapact")
+                .get("/repos/octo/test")
                 .reply(200, mockResponse);
-            expect(
-                await githubRepoObject.getRepoDetails("dapact")
-            ).to.deep.equal(expectedResponse);
+            expect(await githubRepoObject.getRepoDetails("test")).to.deep.equal(
+                expectedResponse
+            );
         });
         it("should get empty array when the API returns 500", async () => {
             nock(API_BASE_URL, {
@@ -86,11 +86,11 @@ describe("Github Repo API", async () => {
                     authorization: `token ${token}`,
                 },
             })
-                .get("/repos/getndazn/dapact")
+                .get("/repos/octo/test")
                 .reply(500);
-            expect(
-                await githubRepoObject.getRepoDetails("dapact")
-            ).to.deep.equal([]);
+            expect(await githubRepoObject.getRepoDetails("test")).to.deep.equal(
+                []
+            );
         });
         it("should get empty array when the API returns 500", async () => {
             nock(API_BASE_URL, {
@@ -98,11 +98,11 @@ describe("Github Repo API", async () => {
                     authorization: `token ${token}`,
                 },
             })
-                .get("/repos/getndazn/dapact")
+                .get("/repos/octo/test")
                 .reply(404);
-            expect(
-                await githubRepoObject.getRepoDetails("dapact")
-            ).to.deep.equal([]);
+            expect(await githubRepoObject.getRepoDetails("test")).to.deep.equal(
+                []
+            );
         });
     });
 
@@ -113,10 +113,10 @@ describe("Github Repo API", async () => {
                     authorization: `token ${token}`,
                 },
             })
-                .put("/user/starred/getndazn/dapact")
+                .put("/user/starred/octo/test")
                 .reply(204);
             expect(
-                await githubRepoObject.toggleStarUnstarRepo("dapact", "star")
+                await githubRepoObject.toggleStarUnstarRepo("test", "star")
             ).to.equal(204);
         });
         it("should be able to unstar a repo", async () => {
@@ -125,10 +125,10 @@ describe("Github Repo API", async () => {
                     authorization: `token ${token}`,
                 },
             })
-                .delete("/user/starred/getndazn/dapact")
+                .delete("/user/starred/octo/test")
                 .reply(204);
             expect(
-                await githubRepoObject.toggleStarUnstarRepo("dapact", "unstar")
+                await githubRepoObject.toggleStarUnstarRepo("test", "unstar")
             ).to.equal(undefined);
         });
     });
