@@ -1,6 +1,6 @@
 import { describe, it } from "mocha";
 import { expect } from "chai";
-import tableGenerator from "../lib/tables/utils/createTable";
+import tableGenerator from "../../lib/tables/utils/createTable";
 
 describe("TableGenerator", () => {
     it("should return a object", () => {

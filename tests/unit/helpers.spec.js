@@ -1,6 +1,6 @@
 import { describe, it } from "mocha";
 import { expect } from "chai";
-import createAPIBaseURL from "../lib/utils/helpers.js";
+import createAPIBaseURL from "../../lib/utils/helpers.js";
 
 describe("Helper", () => {
     it("should return formatted url when a valid org is passed", () => {

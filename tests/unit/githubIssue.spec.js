@@ -1,9 +1,9 @@
 import { describe, it, afterEach } from "mocha";
 import nock from "nock";
 import { expect } from "chai";
-import { GithubIssue } from "../lib/api/services/github/issues/GithubIssue";
-import createAPIBaseURL from "../lib/utils/helpers";
-import { org, token } from "../lib/configManager/parseConfig";
+import { GithubIssue } from "../../lib/api/services/github/issues/GithubIssue";
+import createAPIBaseURL from "../../lib/utils/helpers";
+import { org, token } from "../../lib/configManager/parseConfig";
 
 describe("Github Issue", async () => {
     const API_BASE_URL = "https://api.github.com";
@@ -12,14 +12,13 @@ describe("Github Issue", async () => {
         nock.cleanAll();
     });
     describe("Create Issue", async () => {
-        const createIssueURL = "/repos/getndazn/dapact/issues";
+        const createIssueURL = "/repos/octo/test/issues";
         const data = {
             title: "this is a test title",
             body: "this is a test body",
         };
         it("should be able to create an issue", async () => {
-            const mockResponse =
-                "https://github.com/sripathipai/git-cli/issues/17";
+            const mockResponse = "https://github.com/octo/test/issues/17";
             nock(API_BASE_URL, {
                 reqheaders: {
                     authorization: `token ${token}`,
@@ -57,7 +56,7 @@ describe("Github Issue", async () => {
         });
     });
     describe("Get Issue", async () => {
-        const getIssueUrl = "/repos/getndazn/dapact/issues/17";
+        const getIssueUrl = "/repos/octo/test/issues/17";
         it("should return issue url ,username and state when API returns a valid response", async () => {
             nock(API_BASE_URL, {
                 reqheaders: {
@@ -66,7 +65,7 @@ describe("Github Issue", async () => {
             })
                 .get(getIssueUrl)
                 .reply(200, {
-                    html_url: "https://github.com/octo/cli/issues/17",
+                    html_url: "https://github.com/octo/test/issues/17",
                     user: {
                         login: "octo",
                     },
@@ -74,7 +73,7 @@ describe("Github Issue", async () => {
                     assignees: [],
                 });
             expect(await githubIssueObject.getIssue(17)).to.deep.equal([
-                ["https://github.com/octo/cli/issues/17", "octo", "open"],
+                ["https://github.com/octo/test/issues/17", "octo", "open"],
             ]);
         });
         it("should return empty string when the API returns a 500", async () => {
@@ -99,7 +98,7 @@ describe("Github Issue", async () => {
         });
     });
     describe("Get Issues", async () => {
-        const getIssuesUrl = "/repos/getndazn/dapact/issues";
+        const getIssuesUrl = "/repos/octo/test/issues";
         it("should return issue url ,username and state when API returns a valid response", async () => {
             nock(API_BASE_URL, {
                 reqheaders: {
@@ -109,7 +108,7 @@ describe("Github Issue", async () => {
                 .get(getIssuesUrl)
                 .reply(200, [
                     {
-                        html_url: "https://github.com/octo/cli/issues/17",
+                        html_url: "https://github.com/octo/test/issues/17",
                         user: {
                             login: "octo",
                         },
@@ -118,7 +117,7 @@ describe("Github Issue", async () => {
                     },
                 ]);
             expect(await githubIssueObject.getIssues()).to.deep.equal([
-                ["https://github.com/octo/cli/issues/17", "octo", "open"],
+                ["https://github.com/octo/test/issues/17", "octo", "open"],
             ]);
         });
         it("should return an empty array when the API returns a 500", async () => {
@@ -131,7 +130,7 @@ describe("Github Issue", async () => {
                 .reply(500);
             expect(await githubIssueObject.getIssues()).to.deep.equal([]);
         });
-        it("should return an empty array when teh API returns a 404", async () => {
+        it("should return an empty array when the API returns a 404", async () => {
             nock(API_BASE_URL, {
                 reqheaders: {
                     authorization: `token ${token}`,
@@ -143,7 +142,7 @@ describe("Github Issue", async () => {
         });
     });
     describe("updateIssue", async () => {
-        const updateIssueUrl = "/repos/getndazn/dapact/issues/17";
+        const updateIssueUrl = "/repos/octo/test/issues/17";
         it("should be able to assign an issue", async () => {
             nock(API_BASE_URL, {
                 reqheaders: {
