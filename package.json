@@ -6,6 +6,9 @@
   "bin": {
     "gicli": "./dist/cli.js"
   },
+  "files":[
+    "dist"
+  ],
   "lint-staged": {
     "*.{js,jsx}": [
       "npm run lint",
