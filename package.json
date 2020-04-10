@@ -2,13 +2,10 @@
   "name": "gicli",
   "version": "1.0.0",
   "description": "CLI for interacting with git services",
-  "repository": "https://github.com/sripathipai/git-cli",
+  "repository": "https://github.com/sri85/git-cli",
   "bin": {
     "gicli": "./dist/cli.js"
   },
-  "files": [
-    "dist"
-  ],
   "lint-staged": {
     "*.{js,jsx}": [
       "npm run lint",
