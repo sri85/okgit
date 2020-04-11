@@ -1,6 +1,6 @@
 {
   "name": "okgit",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "CLI for interacting with git services",
   "repository": "https://github.com/sri85/okgit",
   "bin": {
@@ -8,8 +8,7 @@
   },
   "files": [
     "dist",
-    "scripts",
-    "assets"
+    "scripts"
   ],
   "lint-staged": {
     "*.{js,jsx}": [
