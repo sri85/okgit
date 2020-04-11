@@ -17,6 +17,7 @@ In order to configure `okgit` with [Github](https://github.com/) , first step wo
 ![Github Token](./assets/github-personal-token.png). Copy the token to a safe place(Please do not share the token with anyone else)
 
 Now run `okgit config`
+
 [okgit config](./assets/okgit-config.gif)
 
 
