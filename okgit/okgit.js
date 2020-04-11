@@ -1,3 +1,3 @@
 #!/usr/bin/env node
 
-require("../lib/clnpm i");
+require("../lib/cli.js");
