@@ -18,7 +18,7 @@ In order to configure `okgit` with [Github](https://github.com/) , first step wo
 
 Now run `okgit config`
 
-[okgit config](./assets/okgit-config.gif)
+![okgit config](./assets/okgit-config.gif)
 
 
 
