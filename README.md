@@ -1,6 +1,6 @@
 # okgit
 
-![Node.js CI](https://github.com/sri85/okgit/workflows/Node.js%20CI/badge.svg?branch=master)
+![Build](https://github.com/sri85/okgit/workflows/Node.js%20CI/badge.svg?branch=master)
 
 A cli tool for interacting with Github(Gitlab,Bitbucket coming soon). The cli tool aims to speed up the dev productivity by allowing developers to interact with Github without having to leave their favorite commandline. The name is heavily inspired by voice assistant "Ok,Google".
 
