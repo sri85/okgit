@@ -1,14 +1,15 @@
 {
   "name": "okgit",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "CLI for interacting with git services",
-  "repository": "https://github.com/sri85/git-cli",
+  "repository": "https://github.com/sri85/okgit",
   "bin": {
     "okgit": "./dist/cli.js"
   },
   "files": [
     "dist",
-    "scripts"
+    "scripts",
+    "assets"
   ],
   "lint-staged": {
     "*.{js,jsx}": [
@@ -59,7 +60,7 @@
     "babel-register": "^6.26.0"
   },
   "author": "Sripathi Pai",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
