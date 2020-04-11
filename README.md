@@ -24,7 +24,7 @@ Now run `okgit config`
 
 ## Features
 `okgit` allows us to interact with the following Github Features
-# Pull Request
+### Help
 To view what ``okgit`` can do with pull requests just type 
 
 ````commandline
@@ -32,6 +32,7 @@ okgit --help
  
 ````
 ![Command Usage](./assets/okgit-help.png)
+### PullRequest
 
 ````commandline
 okgit pr <id> --help
@@ -39,7 +40,22 @@ okgit pr <id> --help
 ````
 ![PR](./assets/okgit-pr.png)
 
-# Issue
+### Issue
+
+````commandline
+okgit issue --help
+ 
+````
+![ISSUE](./assets/okgit-issue.png)
+
+### Repo
+
+````commandline
+okgit repo --help
+ 
+````
+![Repo](./assets/okgit-repo.png)
+
 
  
 
