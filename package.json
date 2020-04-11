@@ -1,12 +1,12 @@
 {
-  "name": "gicli",
+  "name": "okgit",
   "version": "1.0.0",
   "description": "CLI for interacting with git services",
   "repository": "https://github.com/sri85/git-cli",
   "bin": {
-    "gicli": "./dist/cli.js"
+    "okgit": "./dist/cli.js"
   },
-  "files":[
+  "files": [
     "dist"
   ],
   "lint-staged": {
@@ -29,7 +29,7 @@
   "scripts": {
     "lint": "eslint lib",
     "prettier": "prettier \"**/*.{json,md,scss,yaml,yml}\"",
-    "build": "rm -rf dist && babel lib gicli -d dist",
+    "build": "rm -rf dist && babel lib okgit -d dist",
     "test": "cross-env IS_TESTING=TRUE mocha --exclude=integration/*.spec.js --require babel-core/register tests/unit/*.spec.js",
     "integration": "cross-env-shell IS_TESTING='' mocha --require babel-core/register integration/*.spec.js --timeout=6000",
     "docs": "jsdoc2md lib -d docs",
