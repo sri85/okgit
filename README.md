@@ -9,6 +9,9 @@ A cli tool for interacting with Github(Gitlab,Bitbucket coming soon). The cli to
 npm install okgit -g
 ```
 
+## Features
+![Create Issue](./assets/okgit_create_issue.gif)
+
 ## Configuration
 okgit can be configured with one of the major cloud git providers
 1. Github
