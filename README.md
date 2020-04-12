@@ -53,7 +53,7 @@ okgit pr <id> --help
 okgit issue --help
  
 ````
-![ISSUE](./assets/okgit-issue.png)
+![ISSUE](https://imgur.com/a/Nhc0VXj)
 
 ### Repo
 
