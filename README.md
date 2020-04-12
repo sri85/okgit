@@ -10,7 +10,7 @@ npm install okgit -g
 ```
 
 ## Features
-![Create Issue](https://imgur.com/hsaOc89)
+![Create Issue](https://imgur.com/a/Nhc0VXj)
 ![Create PullRequest](https://imgur.com/meSfMKm)
 
 ## Configuration
