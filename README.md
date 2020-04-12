@@ -10,8 +10,8 @@ npm install okgit -g
 ```
 
 ## Features
-![Create Issue](https://i.imgur.com/hsaOc89.mp4)
-![Create PullRequest](https://i.imgur.com/meSfMKm.mp4)
+[![Create Issue](https://i.imgur.com/hsaOc89.mp4)]
+[![Create PullRequest](https://i.imgur.com/meSfMKm.mp4)]
 
 ## Configuration
 okgit can be configured with one of the major cloud git providers
@@ -25,7 +25,7 @@ In order to configure `okgit` with [Github](https://github.com/) , first step wo
 
 Now run `okgit config`
 
-![okgit config](https://i.imgur.com/8JstAko.mp4)
+[![okgit config](https://i.imgur.com/8JstAko.mp4)]
 
 
 
