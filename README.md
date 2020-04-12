@@ -10,7 +10,8 @@ npm install okgit -g
 ```
 
 ## Features
-![Create Issue](./assets/okgit_create_issue.gif)
+![Create Issue](./assets/okgit-create-issue.gif)
+![Create PullRequest](./assets/okgit-create-pullRequest.gif)
 
 ## Configuration
 okgit can be configured with one of the major cloud git providers
@@ -61,7 +62,3 @@ okgit repo --help
  
 ````
 ![Repo](./assets/okgit-repo.png)
-
-
- 
-
