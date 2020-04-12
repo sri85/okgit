@@ -62,3 +62,11 @@ okgit repo --help
  
 ````
 ![Repo](./assets/okgit-repo.png)
+
+
+### Running and building it locally
+1. Clone the repository.
+2. Install the dependencies using `npm install`.
+3. Build the app using `npm build`.
+4. Install the app locally using `npm install ./ -g`
+
