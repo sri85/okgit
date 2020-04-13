@@ -27,7 +27,7 @@ Now run `okgit config`
 
 ## Features
 ![Create Issue](./assets/okgit-create-issue.gif)
-![Create PullRequest](./assets/okgit-create-pullRequest.gif)
+[![okgit create-pullrequest](https://asciinema.org/a/DTmeNPgxM75m7CriSxNhqPaxl.svg)](https://asciinema.org/a/DTmeNPgxM75m7CriSxNhqPaxl)
 
 
 ## Features
