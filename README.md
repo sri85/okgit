@@ -2,7 +2,8 @@
 
 ![Build](https://github.com/sri85/okgit/workflows/Node.js%20CI/badge.svg?branch=master) [![Node version](https://img.shields.io/node/v/okgit.svg?style=flat)](http://nodejs.org/download/) [![NPM Version](https://badge.fury.io/js/esta.svg?style=flat)](https://npmjs.org/package/okgit)
 
-A cli tool for interacting with Github(Gitlab,Bitbucket coming soon). The cli tool aims to speed up the dev productivity by allowing developers to interact with Github without having to leave their favorite commandline. The name is heavily inspired by voice assistant "Ok,Google".
+A cli tool for interacting with Github(Gitlab,Bitbucket coming soon). The cli tool aims to speed up the dev productivity by allowing devs to interact with Github/Bitbucket/Gitlab without having to leave their favorite commandline. The name is heavily inspired by voice assistant "Ok,Git".
+
 
 ## Installation
 ```
@@ -17,13 +18,16 @@ okgit can be configured with one of the major cloud git providers
 2. Gitlab(Coming Soon)
 3. Bitbucket(Coming Soon)
 
-[![okgit-config](https://asciinema.org/a/8rsGr8p3LCGN7RlOVfMdroKOd.svg)](https://asciinema.org/a/8rsGr8p3LCGN7RlOVfMdroKOd)
+Run `okgit config`, this will ask series of questions for you to get started.
+
 
 ### Github
-In order to configure `okgit` with [Github](https://github.com/) , first step would be to create a token
-![Github Token](./assets/github-personal-token.png). Copy the token to a safe place(Please do not share the token with anyone else)
+In order to configure `okgit` with [Github](https://github.com/) , first step would be to create a token in Github.
+Open Github in web browser(for one last time 😜) , Go to **Settings -> Developer Settings -> Personal Access Token** and click on
+**Generate new token** Copy the token to a safe place(Please do not share the token with anyone else)
 
-Now run `okgit config`
+ Now run `okgit config`
+ [![okgit-config](https://asciinema.org/a/8rsGr8p3LCGN7RlOVfMdroKOd.svg)](https://asciinema.org/a/8rsGr8p3LCGN7RlOVfMdroKOd)
 
 ## Features
 [![asciicast](https://asciinema.org/a/StSI8hmTuKP20rR57aWPDchb4.svg)](https://asciinema.org/a/StSI8hmTuKP20rR57aWPDchb4) 
@@ -70,4 +74,3 @@ okgit repo --help
 2. Install the dependencies using `npm install`.
 3. Build the app using `npm build`.
 4. Install the app locally using `npm install ./ -g`
-
