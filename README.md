@@ -11,7 +11,7 @@ npm install okgit -g
 
 ## Configuration
 
-![okgit config](https://asciinema.org/a/8rsGr8p3LCGN7RlOVfMdroKOd)
+[![asciicast](https://asciinema.org/a/8rsGr8p3LCGN7RlOVfMdroKOd.svg)](https://asciinema.org/a/8rsGr8p3LCGN7RlOVfMdroKOd)
 
 ## Features
 ![Create Issue](./assets/okgit-create-issue.gif)
