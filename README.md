@@ -4,6 +4,15 @@
 
 A cli tool for interacting with Github(Gitlab,Bitbucket coming soon). The cli tool aims to speed up the dev productivity by allowing devs to interact with Github/Bitbucket/Gitlab without having to leave their favorite commandline. The name is heavily inspired by voice assistant "Ok,Git".
 
+# Mission 
+Aim of `okgit` is to make developers comfortable by reducing the times that developer needs to reach the mouse to interact with Github/Gitlab/Bitbucket.(atleast that's the hope )
+
+## Motivation
+Why `okgit`?
+Whilst there are tools out there to interact with **Github/Gitlab/Bitbucket**, `okgit` aims to be a single tool to interact with any of these services, without having to download or configure different tools .
+
+## Security
+`okgit` does not use /store the tokens , all the tokens that are used to continue to reside on the filesystem of your machine where `okgit` is installed.
 
 ## Installation
 ```
@@ -68,6 +77,9 @@ okgit repo --help
 ````
 ![Repo](./assets/okgit-repo.png)
 
+
+## Status
+Currently `okgit` is in **Beta** Status which means there are edges that still need to be polished and do not hesitate to raise [issue](https://github.com/sri85/okgit/issues/new) when you encounter them. And also if you have any cool features that you would like to see in `okgit` , feel free to raise a [feature-request](https://github.com/sri85/okgit/issues/new)
 
 ### Running and building it locally
 1. Clone the repository.
