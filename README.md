@@ -26,12 +26,12 @@ In order to configure `okgit` with [Github](https://github.com/) , first step wo
 Now run `okgit config`
 
 ## Features
-![Create Issue](./assets/okgit-create-issue.gif)
+[![asciicast](https://asciinema.org/a/StSI8hmTuKP20rR57aWPDchb4.svg)](https://asciinema.org/a/StSI8hmTuKP20rR57aWPDchb4) 
 [![okgit create-pullrequest](https://asciinema.org/a/DTmeNPgxM75m7CriSxNhqPaxl.svg)](https://asciinema.org/a/DTmeNPgxM75m7CriSxNhqPaxl)
 
 
 ## Features
-`okgit` allows us to interact with the following Github Features
+`okgit` allows us to interact with the cloud git providers(Github) features for now , without having to leave your terminal.
 ### Help
 To view what ``okgit`` can do with pull requests just type 
 
