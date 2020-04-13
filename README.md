@@ -8,16 +8,16 @@ A cli tool for interacting with Github(Gitlab,Bitbucket coming soon). The cli to
 ```
 npm install okgit -g
 ```
-
-## Features
-![Create Issue](./assets/okgit-create-issue.gif)
-![Create PullRequest](./assets/okgit-create-pullRequest.gif)
+The above command installs `okgit`, globally . Couple more steps, hang in there .
 
 ## Configuration
+I know, you are excited to get your hands dirty with `okgit`, we will now proceed to configure the tool.
 okgit can be configured with one of the major cloud git providers
 1. Github
 2. Gitlab(Coming Soon)
 3. Bitbucket(Coming Soon)
+
+[![okgit-config](https://asciinema.org/a/8rsGr8p3LCGN7RlOVfMdroKOd.svg)](https://asciinema.org/a/8rsGr8p3LCGN7RlOVfMdroKOd)
 
 ### Github
 In order to configure `okgit` with [Github](https://github.com/) , first step would be to create a token
@@ -25,12 +25,13 @@ In order to configure `okgit` with [Github](https://github.com/) , first step wo
 
 Now run `okgit config`
 
-![okgit config](./assets/okgit-config.gif)
-
+## Features
+[![asciicast](https://asciinema.org/a/StSI8hmTuKP20rR57aWPDchb4.svg)](https://asciinema.org/a/StSI8hmTuKP20rR57aWPDchb4) 
+[![okgit create-pullrequest](https://asciinema.org/a/DTmeNPgxM75m7CriSxNhqPaxl.svg)](https://asciinema.org/a/DTmeNPgxM75m7CriSxNhqPaxl)
 
 
 ## Features
-`okgit` allows us to interact with the following Github Features
+`okgit` allows us to interact with the cloud git providers(Github) features for now , without having to leave your terminal.
 ### Help
 To view what ``okgit`` can do with pull requests just type 
 
