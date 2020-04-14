@@ -37,7 +37,8 @@
     "postinstall": "sh scripts/postinstall.sh",
     "preuninstall": "sh scripts/uninstall.sh"
   },
-  "keywords": [],
+  "keywords": ["node-cli","cli","github","bitbucket","gitlab","productivity",
+  "developer-tools"],
   "dependencies": {
     "@hapi/joi": "^17.1.0",
     "axios": "^0.19.2",
