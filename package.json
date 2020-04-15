@@ -1,6 +1,6 @@
 {
   "name": "okgit",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "CLI for interacting with git services",
   "repository": "https://github.com/sri85/okgit",
   "bin": {
