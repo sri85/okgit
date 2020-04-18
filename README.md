@@ -86,3 +86,7 @@ Currently `okgit` is in **Beta** Status which means there are edges that still n
 2. Install the dependencies using `npm install`.
 3. Build the app using `npm build`.
 4. Install the app locally using `npm install ./ -g`
+
+### Releasing the new version
+
+`okgit` uses `release-it` plugin to release. Use `npm run release` to make a release
