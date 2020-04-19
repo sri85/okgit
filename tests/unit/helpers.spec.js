@@ -4,14 +4,14 @@ import createAPIBaseURL from "../../lib/utils/helpers.js";
 
 describe("Helper", () => {
     it("should return formatted url when a valid org is passed", () => {
-        expect(createAPIBaseURL("getndazn")).to.equal(
-            "https://api.github.com/repos/getndazn"
+        expect(createAPIBaseURL("okgit", "github")).to.equal(
+            "https://api.github.com/repos/okgit"
         );
     });
     it("should return undefined when org is undefined", () => {
-        expect(createAPIBaseURL(undefined)).to.equal(undefined);
+        expect(createAPIBaseURL(undefined, undefined)).to.equal(undefined);
     });
     it("should be of type of string", () => {
-        expect(createAPIBaseURL("getndazn")).to.be.a("string");
+        expect(createAPIBaseURL("okgit", "github")).to.be.a("string");
     });
 });

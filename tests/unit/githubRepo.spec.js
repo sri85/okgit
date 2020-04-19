@@ -7,7 +7,7 @@ import { org, token } from "../../lib/configManager/parseConfig";
 
 describe("Github Repo API", async () => {
     const API_BASE_URL = "https://api.github.com";
-    const githubRepoObject = new GithubRepo(createAPIBaseURL(org));
+    const githubRepoObject = new GithubRepo(createAPIBaseURL(org, "github"));
     const repoData = {
         name: "test-repo",
         description: "Test Description",

@@ -23,7 +23,9 @@ import { listPullRequestMissingCreatedAtResponse } from "./mocks/pull_requests/l
 
 describe("GitHubPullRequests", () => {
     const API_BASE_URL = "https://api.github.com";
-    const pullRequestObject = new GithubPullRequest(createAPIBaseURL(org));
+    const pullRequestObject = new GithubPullRequest(
+        createAPIBaseURL(org, "github")
+    );
 
     afterEach(() => {
         nock.cleanAll();
