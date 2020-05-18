@@ -7,7 +7,7 @@ import { org, token } from "../../lib/configManager/parseConfig";
 
 describe("Github Issue", async () => {
     const API_BASE_URL = "https://api.github.com";
-    const githubIssueObject = new GithubIssue(createAPIBaseURL(org));
+    const githubIssueObject = new GithubIssue(createAPIBaseURL(org, "github"));
     afterEach(() => {
         nock.cleanAll();
     });
