@@ -63,7 +63,7 @@
     "moment": "^2.24.0",
     "remark": "^12.0.0",
     "remark-github": "^9.0.0",
-    "remark-html": "^11.0.1",
+    "remark-html": "^13.0.2",
     "shelljs": "^0.8.3"
   },
   "author": "Sripathi Pai",
