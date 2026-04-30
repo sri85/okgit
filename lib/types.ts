@@ -1,6 +1,7 @@
 import Table from "cli-table";
 
 export type HostingProvider =
+    | ""
     | "Github"
     | "Gitlab"
     | "Bitbucket"
