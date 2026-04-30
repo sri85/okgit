@@ -1,5 +1,8 @@
 {
-    "extends": "eslint:recommended",
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended"
+    ],
     "rules": {
       // enable additional rules
       "quotes": [
@@ -9,9 +12,17 @@
       "semi": [
         "error",
         "always"
-      ]
+      ],
+      "@typescript-eslint/camelcase": "off",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-use-before-define": "off",
+      "@typescript-eslint/no-var-requires": "off"
     },
-    "parser": "babel-eslint",
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
       "parserOptions": {
         "ecmaVersion": 6,
         "sourceType": "module",

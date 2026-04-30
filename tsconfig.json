@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "ignoreDeprecations": "6.0",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "noUncheckedIndexedAccess": true,
+        "outDir": "dist",
+        "resolveJsonModule": true,
+        "rootDir": ".",
+        "skipLibCheck": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "target": "es2018",
+        "types": ["node", "mocha"]
+    },
+    "include": [
+        "lib/**/*.ts",
+        "okgit/**/*.ts",
+        "tests/**/*.ts",
+        "integration/**/*.ts",
+        "package.json"
+    ],
+    "exclude": ["dist", "node_modules"]
+}
