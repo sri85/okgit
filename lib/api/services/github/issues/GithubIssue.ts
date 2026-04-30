@@ -10,6 +10,9 @@ import {
     GithubIssueResponse,
     IssueUpdateAction,
 } from "../../../../types";
+import { IssueDetails, IssueProvider } from "../../../../providers/contracts";
+import { mapGithubIssue } from "../../../../providers/github/mappers/issues";
+import { issueDetailsToRow } from "../../../../tables/mappers/issues";
 
 import { repo } from "../../../../configManager/parseConfig";
 
@@ -19,7 +22,7 @@ type IssueUpdatePayload =
     | { assignees: string[] }
     | { state: string };
 
-export class GithubIssue extends BaseAPI {
+export class GithubIssue extends BaseAPI implements IssueProvider {
     constructor(baseURL: string, timeout?: number) {
         super(baseURL, timeout);
     }
@@ -47,29 +50,38 @@ export class GithubIssue extends BaseAPI {
         }
         return result;
     }
-    async getIssue(issueId: number | string): Promise<DataTable> {
+    async getIssueDetails(
+        issueId: number | string
+    ): Promise<IssueDetails | undefined> {
         const url = `/${repo}/issues/${issueId}`;
-        const result: DataTable = [];
         const getIssueResponse = await this.getRequest<unknown>(url).catch(
             (err: unknown) => {
                 errorHandler(this.getStatusCode(err), "get-issue", repo);
-                return result;
+                return undefined;
             }
         );
+        if (getIssueResponse === undefined) {
+            return undefined;
+        }
         if (
             validateSchema<GithubIssueResponse>(getIssueResponse, issueSchema())
         ) {
-            result.push([
-                getIssueResponse.html_url,
-                getIssueResponse.user.login,
-                getIssueResponse.state,
-            ]);
+            return mapGithubIssue(getIssueResponse);
         }
-        return result;
+        return undefined;
     }
-    async getIssues(): Promise<DataTable> {
+
+    async getIssue(issueId: number | string): Promise<DataTable> {
+        const issue = await this.getIssueDetails(issueId);
+        if (issue === undefined) {
+            return [];
+        }
+        return [issueDetailsToRow(issue)];
+    }
+
+    async listIssues(): Promise<IssueDetails[]> {
         const getIssuesURL = `/${repo}/issues`;
-        const result: DataTable = [];
+        const result: IssueDetails[] = [];
         const getIssueResponse = await this.getRequest<unknown>(
             getIssuesURL
         ).catch((err: unknown) => {
@@ -83,10 +95,15 @@ export class GithubIssue extends BaseAPI {
             )
         ) {
             getIssueResponse.forEach(obj => {
-                result.push([obj.html_url, obj.user.login, obj.state]);
+                result.push(mapGithubIssue(obj));
             });
         }
         return result;
+    }
+
+    async getIssues(): Promise<DataTable> {
+        const issues = await this.listIssues();
+        return issues.map(issueDetailsToRow);
     }
 
     async updateIssue(

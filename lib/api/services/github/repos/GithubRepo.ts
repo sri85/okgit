@@ -10,8 +10,14 @@ import {
     RepoUpdateAction,
 } from "../../../../types";
 import { AxiosResponse } from "axios";
+import {
+    RepositoryDetails,
+    RepositoryProvider,
+} from "../../../../providers/contracts";
+import { mapGithubRepositoryDetails } from "../../../../providers/github/mappers/repositories";
+import { repositoryDetailsToRow } from "../../../../tables/mappers/repositories";
 
-export class GithubRepo extends BaseAPI {
+export class GithubRepo extends BaseAPI implements RepositoryProvider {
     private readonly userUrl: string;
 
     constructor(baseURL: string, timeout?: number) {
@@ -19,61 +25,69 @@ export class GithubRepo extends BaseAPI {
         this.userUrl = "https://api.github.com/user";
     }
 
-    async getRepoDetails(repoName: string): Promise<DataTable> {
+    async getRepositoryDetails(
+        repoName: string
+    ): Promise<RepositoryDetails | undefined> {
         const userRepoUrl = `/${repoName}`;
-        const results: DataTable = [];
         const listRepositoriesResponse = await this.getRequest<unknown>(
             userRepoUrl
         ).catch((err: unknown) => {
             errorHandler(this.getStatusCode(err), "listRepositories", repoName);
-            return results;
+            return undefined;
         });
+        if (listRepositoriesResponse === undefined) {
+            return undefined;
+        }
         if (
             validateSchema<GithubRepoResponse>(
                 listRepositoriesResponse,
                 listUserRepositoriesSchema()
             )
         ) {
-            results.push([
-                listRepositoriesResponse.full_name,
-                listRepositoriesResponse.html_url,
-                listRepositoriesResponse.ssh_url,
-                listRepositoriesResponse.forks,
-                listRepositoriesResponse.open_issues,
-                listRepositoriesResponse.stargazers_count,
-                listRepositoriesResponse.subscribers_count,
-            ]);
+            return mapGithubRepositoryDetails(listRepositoriesResponse);
         }
-        return results;
+        return undefined;
     }
 
-    async createRepo(repoData: GithubRepoCreateData): Promise<DataTable> {
+    async getRepoDetails(repoName: string): Promise<DataTable> {
+        const repoDetails = await this.getRepositoryDetails(repoName);
+        if (repoDetails === undefined) {
+            return [];
+        }
+        return [repositoryDetailsToRow(repoDetails)];
+    }
+
+    async createRepository(
+        repoData: GithubRepoCreateData
+    ): Promise<RepositoryDetails | undefined> {
         const createRepoURL = `${this.userUrl}/repos`;
-        const results: DataTable = [];
         const createRepositoryResponse = await this.postRequest<unknown>(
             createRepoURL,
             repoData
         ).catch((err: unknown) => {
             errorHandler(this.getStatusCode(err), "createRepository", "name");
-            return results;
+            return undefined;
         });
+        if (createRepositoryResponse === undefined) {
+            return undefined;
+        }
         if (
             validateSchema<GithubRepoResponse>(
                 createRepositoryResponse,
                 listUserRepositoriesSchema()
             )
         ) {
-            results.push([
-                createRepositoryResponse.full_name,
-                createRepositoryResponse.html_url,
-                createRepositoryResponse.ssh_url,
-                createRepositoryResponse.forks,
-                createRepositoryResponse.open_issues,
-                createRepositoryResponse.stargazers_count,
-                createRepositoryResponse.subscribers_count,
-            ]);
+            return mapGithubRepositoryDetails(createRepositoryResponse);
         }
-        return results;
+        return undefined;
+    }
+
+    async createRepo(repoData: GithubRepoCreateData): Promise<DataTable> {
+        const repoDetails = await this.createRepository(repoData);
+        if (repoDetails === undefined) {
+            return [];
+        }
+        return [repositoryDetailsToRow(repoDetails)];
     }
 
     async toggleStarUnstarRepo(
@@ -128,4 +142,5 @@ export class GithubRepo extends BaseAPI {
 
         return response;
     }
+
 }

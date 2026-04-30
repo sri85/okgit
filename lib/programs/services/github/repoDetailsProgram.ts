@@ -10,4 +10,11 @@ export default function repoDetailsProgram() {
         .action(async function(repo) {
             await printRepoDetailsTable("list", repo, undefined);
         });
+
+    program
+        .command("repository-details <repo>")
+        .description("Get repo details")
+        .action(async function(repo) {
+            await printRepoDetailsTable("list", repo, undefined);
+        });
 }

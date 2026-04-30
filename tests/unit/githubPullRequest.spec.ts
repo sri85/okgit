@@ -1,6 +1,7 @@
-import { describe, it, afterEach, xit } from "mocha";
+import { describe, it, afterEach } from "mocha";
 import nock from "nock";
 import { expect } from "chai";
+import sinon from "sinon";
 
 import {
     listPullRequestsMocks,
@@ -34,7 +35,10 @@ describe("GitHubPullRequests", () => {
     describe("getPullRequests", () => {
         const pullRequestURL =
             "/repos/octo/playback-web-player/pulls?state=open";
-        xit("should return pr link ,state ,username and the date when PR was raised when the API returns 200 ", async () => {
+        it("should return pr link, state, username and the date when PR was raised when the API returns 200", async () => {
+            const clock = sinon.useFakeTimers(
+                new Date("2020-02-25T00:00:00Z").getTime()
+            );
             nock(API_BASE_URL, {
                 reqheaders: {
                     authorization: `token ${token}`,
@@ -44,24 +48,28 @@ describe("GitHubPullRequests", () => {
                 .reply(200, listPullRequestsMocks);
             const expectedResult = [
                 [
-                    "https://github.com/octo/test/pull/43",
+                    "https://github.com/getndazn/dapact/pull/43",
                     "open",
-                    "sri85",
+                    "sripathipai",
                     "12 days ago",
                 ],
                 [
-                    "https://github.com/octo/test/pull/23",
+                    "https://github.com/getndazn/dapact/pull/23",
                     "open",
-                    "sri85",
+                    "sripathipai",
                     "5 months ago",
                 ],
             ];
-            expect(
-                await pullRequestObject.getPullRequests(
-                    "playback-web-player",
-                    "open"
-                )
-            ).to.deep.equal(expectedResult);
+            try {
+                expect(
+                    await pullRequestObject.getPullRequests(
+                        "playback-web-player",
+                        "open"
+                    )
+                ).to.deep.equal(expectedResult);
+            } finally {
+                clock.restore();
+            }
         });
 
         it("should return an empty array when the github api returns an empty response", async () => {

@@ -1,4 +1,3 @@
-import clc from "cli-color";
 import moment from "moment";
 import { repo } from "../../../../configManager/parseConfig";
 
@@ -24,8 +23,30 @@ import {
     GithubPullRequestUpdateResponse,
     GithubReviewersResponse,
 } from "../../../../types";
+import {
+    PullRequestComment,
+    PullRequestCommit,
+    PullRequestFile,
+    PullRequestListItem,
+    PullRequestMergeResult,
+    PullRequestProvider,
+    PullRequestSummary,
+} from "../../../../providers/contracts";
+import {
+    mapGithubPullRequestComment,
+    mapGithubPullRequestCommit,
+    mapGithubPullRequestFile,
+    mapGithubPullRequestListItem,
+    mapGithubPullRequestSummary,
+} from "../../../../providers/github/mappers/pullRequests";
+import {
+    pullRequestCommentToRow,
+    pullRequestCommitToRow,
+    pullRequestFileToRow,
+    pullRequestSummaryToRow,
+} from "../../../../tables/mappers/pullRequests";
 
-export class GithubPullRequest extends BaseAPI {
+export class GithubPullRequest extends BaseAPI implements PullRequestProvider {
     constructor(baseURL: string, timeout?: number) {
         super(baseURL, timeout);
     }
@@ -35,7 +56,7 @@ export class GithubPullRequest extends BaseAPI {
         currentBranchName: string,
         baseBranchName: string,
         body: string
-    ): Promise<void> {
+    ): Promise<string> {
         const prData = {
             title: title,
             head: currentBranchName,
@@ -55,31 +76,27 @@ export class GithubPullRequest extends BaseAPI {
             !("html_url" in createRepositoryResponse) ||
             typeof createRepositoryResponse.html_url !== "string"
         ) {
-            return;
+            return "";
         }
         const createdPullRequest: GithubCreatePullRequestResponse = {
             html_url: createRepositoryResponse.html_url,
         };
-        console.log(
-            `Created Pull Request ${createdPullRequest.html_url} 🚀 ${clc.green(
-                "use okgit pr <id> --web "
-            )} top open in your favorite browser`
-        );
-        return;
+        return createdPullRequest.html_url;
     }
-    async getPullRequests(
+
+    async listPullRequests(
         repoName: string,
         state: string | undefined
-    ): Promise<DataTable> {
+    ): Promise<PullRequestListItem[]> {
         const pullRequestState = state === undefined ? "open" : state;
         const getPullRequestUrl = `/${repoName}/pulls?state=${pullRequestState}`;
 
-        const PRDetailTable: DataTable = [];
+        const pullRequests: PullRequestListItem[] = [];
         const response = await this.getRequest<unknown>(
             getPullRequestUrl
         ).catch((err: unknown) => {
             errorHandler(this.getStatusCode(err), "pullRequests", repo);
-            return PRDetailTable;
+            return pullRequests;
         });
 
         if (
@@ -89,26 +106,45 @@ export class GithubPullRequest extends BaseAPI {
             )
         ) {
             response.forEach(obj => {
-                const url = obj.html_url;
-                const createdDate = this.formatDate(obj.created_at);
-                const user = obj.user.login;
-                PRDetailTable.push([url, pullRequestState, user, createdDate]);
+                pullRequests.push(
+                    mapGithubPullRequestListItem(
+                        obj,
+                        pullRequestState,
+                        this.formatDate
+                    )
+                );
             });
         }
-        return PRDetailTable;
+        return pullRequests;
     }
-    async showPullRequestComments(id: number | string): Promise<DataTable> {
+
+    async getPullRequests(
+        repoName: string,
+        state: string | undefined
+    ): Promise<DataTable> {
+        const pullRequests = await this.listPullRequests(repoName, state);
+        return pullRequests.map(pullRequest => [
+            pullRequest.url,
+            pullRequest.state,
+            pullRequest.author,
+            pullRequest.createdAt,
+        ]);
+    }
+
+    async listPullRequestComments(
+        id: number | string
+    ): Promise<PullRequestComment[]> {
         const pullRequestCommentsUrl = this.createPullRequestURL(
             id,
             "comments"
         );
 
-        const resultsTable: DataTable = [];
+        const comments: PullRequestComment[] = [];
         const response = await this.getRequest<unknown>(
             pullRequestCommentsUrl
         ).catch((err: unknown) => {
             errorHandler(this.getStatusCode(err), "comments", repo);
-            return resultsTable;
+            return comments;
         });
         if (
             validateSchema<GithubPullRequestCommentResponse[]>(
@@ -117,23 +153,22 @@ export class GithubPullRequest extends BaseAPI {
             )
         ) {
             response.forEach(table => {
-                let login: string;
-                if (table.user === null) {
-                    login = "Unknown User";
-                } else {
-                    login = table.user.login;
-                }
-                const commentUrl = table.html_url;
-                resultsTable.push([login, commentUrl]);
+                comments.push(mapGithubPullRequestComment(table));
             });
-            return resultsTable;
+            return comments;
         }
-        return resultsTable;
+        return comments;
     }
 
-    async getPullRequest(id: number | string): Promise<DataTable> {
+    async showPullRequestComments(id: number | string): Promise<DataTable> {
+        const comments = await this.listPullRequestComments(id);
+        return comments.map(pullRequestCommentToRow);
+    }
+
+    async getPullRequestSummary(
+        id: number | string
+    ): Promise<PullRequestSummary | undefined> {
         const url = this.createPullRequestURL(id);
-        const resultsTable: DataTable = [];
         const response = await this.getRequest<unknown>(url).catch(
             (err: unknown) => {
                 errorHandler(
@@ -141,38 +176,41 @@ export class GithubPullRequest extends BaseAPI {
                     "PullRequestDetails",
                     repo
                 );
-                return resultsTable;
+                return undefined;
             }
         );
+        if (response === undefined) {
+            return undefined;
+        }
         if (
             validateSchema<GithubPullRequestDetailsResponse>(
                 response,
                 pullRequestDetailsSchema()
             )
         ) {
-            const summary = [
-                response.merged,
-                response.additions,
-                response.deletions,
-                response.changed_files,
-                response.mergeable_state,
-                response.commits,
-                response.comments,
-                response.review_comments,
-            ];
-            resultsTable.push(summary);
+            return mapGithubPullRequestSummary(response);
         }
-        return resultsTable;
+        return undefined;
     }
 
-    async showPullRequestCommits(id: number | string): Promise<DataTable> {
+    async getPullRequest(id: number | string): Promise<DataTable> {
+        const summary = await this.getPullRequestSummary(id);
+        if (summary === undefined) {
+            return [];
+        }
+        return [pullRequestSummaryToRow(summary)];
+    }
+
+    async listPullRequestCommits(
+        id: number | string
+    ): Promise<PullRequestCommit[]> {
         const pullRequestCommentsUrl = `${repo}/pulls/${id}/commits`;
-        const resultsTable: DataTable = [];
+        const commits: PullRequestCommit[] = [];
         const response = await this.getRequest<unknown>(
             pullRequestCommentsUrl
         ).catch((err: unknown) => {
             errorHandler(this.getStatusCode(err), "commits", repo);
-            return resultsTable;
+            return commits;
         });
         if (
             validateSchema<GithubPullRequestCommitResponse[]>(
@@ -181,24 +219,25 @@ export class GithubPullRequest extends BaseAPI {
             )
         ) {
             response.forEach(table => {
-                resultsTable.push([
-                    table.commit.committer.name,
-                    table.commit.message,
-                    table.html_url,
-                ]);
+                commits.push(mapGithubPullRequestCommit(table));
             });
         }
-        return resultsTable;
+        return commits;
     }
 
-    async showPullRequestFiles(id: number | string): Promise<DataTable> {
+    async showPullRequestCommits(id: number | string): Promise<DataTable> {
+        const commits = await this.listPullRequestCommits(id);
+        return commits.map(pullRequestCommitToRow);
+    }
+
+    async listPullRequestFiles(id: number | string): Promise<PullRequestFile[]> {
         const pullRequestFilesUrl = `${repo}/pulls/${id}/files`;
-        const resultsTable: DataTable = [];
+        const files: PullRequestFile[] = [];
         const response = await this.getRequest<unknown>(
             pullRequestFilesUrl
         ).catch((err: unknown) => {
             errorHandler(this.getStatusCode(err), "pullRequestFiles", repo);
-            return resultsTable;
+            return files;
         });
         if (
             validateSchema<GithubPullRequestFileResponse[]>(
@@ -207,17 +246,15 @@ export class GithubPullRequest extends BaseAPI {
             )
         ) {
             response.forEach(table => {
-                resultsTable.push([
-                    table.filename,
-                    table.status,
-                    `${clc.green(table.additions)}`,
-                    `${clc.red(table.deletions)}`,
-                    `${table.status}`,
-                    `${table.changes}`,
-                ]);
+                files.push(mapGithubPullRequestFile(table));
             });
         }
-        return resultsTable;
+        return files;
+    }
+
+    async showPullRequestFiles(id: number | string): Promise<DataTable> {
+        const files = await this.listPullRequestFiles(id);
+        return files.map(pullRequestFileToRow);
     }
     async updatePullRequestStatus(
         id: number | string,
@@ -302,7 +339,9 @@ export class GithubPullRequest extends BaseAPI {
         }
         return resultsTable;
     }
-    async mergePullRequest(pullRequestId: number | string): Promise<void> {
+    async mergePullRequest(
+        pullRequestId: number | string
+    ): Promise<PullRequestMergeResult | undefined> {
         const mergePullRequestURL = `/${repo}/pulls/${pullRequestId}/merge`;
         const response = await this.putRequest<GithubMergePullRequestResponse>(
             mergePullRequestURL,
@@ -313,19 +352,12 @@ export class GithubPullRequest extends BaseAPI {
             return undefined;
         });
         if (response === undefined) {
-            return;
+            return undefined;
         }
-        if (response.status === 200) {
-            console.log(
-                `Merged ${pullRequestId} ${response.data.message} successfully 💥`
-            );
-        } else if (response.status === 405 || response.status === 409) {
-            console.error(
-                `Failed to merge because ${
-                    response.data.message
-                } 😞 please open the PR ${clc.green("okgit pr <id> --web")}`
-            );
-        }
+        return {
+            status: response.status,
+            message: response.data.message,
+        };
     }
 
     createPullRequestURL(id: number | string, prAttribute = ""): string {

@@ -1,9 +1,9 @@
-import { GithubPR } from "../api/services/github/GitHubAPI";
+import { updatePullRequestStatus } from "../application/usecases/pullRequests";
 export async function printPullRequestUpdateTable(
     prId: number | string,
     state: string
 ): Promise<void> {
-    await GithubPR.updatePullRequestStatus(prId, state);
+    await updatePullRequestStatus(prId, state);
     if (state === "closed") {
         console.log(`Updated the status of PR ${prId} to ${state} 🔒`);
     }

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import program from "commander";
-import { GithubIssueAPI } from "../../../api/services/github/GitHubAPI";
 import issueCreator from "../../questionnaire/issueQuestionnaire";
+import { createIssue as createIssueUseCase } from "../../../application/usecases/issues";
 
 export default function createIssue() {
     program
@@ -9,7 +9,7 @@ export default function createIssue() {
         .action(async function() {
             const issueDetails = await issueCreator();
             console.log(
-                await GithubIssueAPI.createIssue(
+                await createIssueUseCase(
                     issueDetails["issue_title"],
                     issueDetails["issue_body"]
                 )

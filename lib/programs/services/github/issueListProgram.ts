@@ -11,4 +11,11 @@ export default function listIssues() {
         .action(async function() {
             await printIssueDetailsTable("list");
         });
+
+    program
+        .command("issues")
+        .description("List issues from a repository")
+        .action(async function() {
+            await printIssueDetailsTable("list");
+        });
 }

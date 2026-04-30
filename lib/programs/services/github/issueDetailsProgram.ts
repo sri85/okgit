@@ -8,11 +8,11 @@ import { openLink } from "../../../tables/openLink";
 export default function issueDetails() {
     program
         .command("issue <id>")
-        .option("-s --state <state>", "Close/Reopen Issues")
-        .option("-d --details", "Issue details")
-        .option("-a --assign <assign>", "Assign User(s) to issue")
-        .option("-l --label <label>", "Add label(s) to issue")
-        .option("-w --web", "Open the issue in web browser")
+        .option("-s, --state <state>", "Close/Reopen Issues")
+        .option("-d, --details", "Issue details")
+        .option("-a, --assign <assign>", "Assign User(s) to issue")
+        .option("-l, --label <label>", "Add label(s) to issue")
+        .option("-w, --web", "Open the issue in web browser")
         .action(async function(issueId, cmdObj) {
             cmdObj["state"]
                 ? await printUpdateIssueDetailsTable(

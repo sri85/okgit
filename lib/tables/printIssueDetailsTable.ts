@@ -1,26 +1,25 @@
-import { GithubIssueAPI } from "../api/services/github/GitHubAPI";
 import { LIST_ISSUE_HEADER } from "../tables/utils/pullRequestTableHeaders";
-import createTable from "./utils/createTable";
-import printTable from "./utils/printTable";
-import { DataTable, IssueDetailAction } from "../types";
+import { IssueDetailAction } from "../types";
+import { getIssue, listIssues } from "../application/usecases/issues";
+import { IssueDetails } from "../providers/contracts";
+import { issueDetailsToRow } from "./mappers/issues";
+import { renderTable } from "./utils/renderTable";
 
 export async function printIssueDetailsTable(
     action: IssueDetailAction,
     issueId: number | string = ""
 ): Promise<void> {
-    let results: DataTable = [];
-    const resultsTable = createTable(LIST_ISSUE_HEADER);
+    let results: IssueDetails[] = [];
     switch (action.toLowerCase()) {
-        case "details":
-            results = await GithubIssueAPI.getIssue(issueId);
+        case "details": {
+            const issue = await getIssue(issueId);
+            results = issue === undefined ? [] : [issue];
             break;
+        }
         case "list":
-            results = await GithubIssueAPI.getIssues();
+            results = await listIssues();
             break;
     }
 
-    for (const result of results) {
-        resultsTable.push(result.map(String));
-    }
-    printTable(resultsTable);
+    renderTable(LIST_ISSUE_HEADER, results, issueDetailsToRow);
 }

@@ -1,6 +1,6 @@
-import { GithubIssueAPI } from "../api/services/github/GitHubAPI";
 import printTable from "./utils/printTable";
 import { IssueUpdateAction } from "../types";
+import { updateIssue } from "../application/usecases/issues";
 
 export async function printUpdateIssueDetailsTable(
     action: IssueUpdateAction,
@@ -8,7 +8,7 @@ export async function printUpdateIssueDetailsTable(
     data: string | string[]
 ): Promise<void> {
     let updateMessage = "";
-    await GithubIssueAPI.updateIssue(action, issueId, data);
+    await updateIssue(action, issueId, data);
     switch (action.toLowerCase()) {
         case "close":
             updateMessage = `${data}d issue ${issueId}`;
