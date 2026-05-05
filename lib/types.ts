@@ -13,6 +13,7 @@ export interface OkgitConfig {
     repo: string;
     organization_username: string;
     personnel_access_token: string;
+    personal_access_token?: string;
     hosting_provider_choice?: HostingProvider;
     pullRequestTemplate?: string;
     issueTemplate?: string;

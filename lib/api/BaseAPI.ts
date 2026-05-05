@@ -1,26 +1,29 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { token } from "../configManager/parseConfig";
-
-type RequestBody = object | string[] | string | number | undefined;
-type RequestHeaders = Record<string, string> | undefined;
+import { token as configuredToken } from "../configManager/parseConfig";
+import { AuthHeaders, createGitHubAuthHeaders } from "./authHeaders";
+import { HttpClient, RequestBody, RequestHeaders } from "./httpClient";
 
 /**
  * @class API Factory
  */
-export class BaseAPI {
+export class BaseAPI implements HttpClient {
     private readonly baseURL: string;
     private readonly timeout: number;
-    private readonly headers: Record<string, string>;
+    private readonly headers: AuthHeaders;
 
     /**
      * Creates an instance.
      * @param {string}baseURL
      * @param {number}timeout
      */
-    constructor(baseURL: string, timeout = 5000) {
+    constructor(
+        baseURL: string,
+        timeout = 5000,
+        headers: AuthHeaders = createGitHubAuthHeaders(configuredToken)
+    ) {
         this.baseURL = baseURL;
         this.timeout = timeout;
-        this.headers = { Authorization: `token ${token}` };
+        this.headers = headers;
     }
     createRequestObject() {
         return axios.create({
@@ -31,6 +34,10 @@ export class BaseAPI {
     }
 
     async getRequest<T>(url: string): Promise<T> {
+        return this.get<T>(url);
+    }
+
+    async get<T>(url: string): Promise<T> {
         const requestInstance = this.createRequestObject();
         const responseObject: AxiosResponse<T> = await requestInstance
             .get<T>(url)
@@ -40,6 +47,10 @@ export class BaseAPI {
         return responseObject.data;
     }
     async patchRequest<T>(url: string, data: RequestBody): Promise<T> {
+        return this.patch<T>(url, data);
+    }
+
+    async patch<T>(url: string, data: RequestBody): Promise<T> {
         const requestInstance = this.createRequestObject();
         const responseObject: AxiosResponse<T> = await requestInstance
             .patch<T>(url, data)
@@ -49,6 +60,10 @@ export class BaseAPI {
         return responseObject.data;
     }
     async postRequest<T>(url: string, data: RequestBody): Promise<T> {
+        return this.post<T>(url, data);
+    }
+
+    async post<T>(url: string, data?: RequestBody): Promise<T> {
         const requestInstance = this.createRequestObject();
         const responseObject: AxiosResponse<T> = await requestInstance
             .post<T>(url, data)
@@ -59,6 +74,10 @@ export class BaseAPI {
     }
 
     async deleteRequest<T>(url: string, data?: RequestBody): Promise<T> {
+        return this.delete<T>(url, data);
+    }
+
+    async delete<T>(url: string, data?: RequestBody): Promise<T> {
         const requestInstance = this.createRequestObject();
         const responseObject: AxiosResponse<T> = await requestInstance
             .delete<T>(url, { data })
@@ -69,6 +88,14 @@ export class BaseAPI {
     }
 
     async putRequest<T>(
+        url: string,
+        data?: RequestBody,
+        headers?: RequestHeaders
+    ): Promise<AxiosResponse<T>> {
+        return this.put<T>(url, data, headers);
+    }
+
+    async put<T>(
         url: string,
         data?: RequestBody,
         headers?: RequestHeaders

@@ -12,7 +12,7 @@ export default function cliConfig() {
             },
             {
                 type: "password",
-                name: "personnel_access_token",
+                name: "personal_access_token",
                 message: "Please enter your access token",
             },
             {

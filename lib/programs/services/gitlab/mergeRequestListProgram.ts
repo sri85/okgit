@@ -4,7 +4,7 @@ import { GitlabMR } from "../../../api/services/gitlab/GitlabAPI";
 import createTable from "../../../tables/utils/createTable";
 import printTable from "../../../tables/utils/printTable";
 import { PULL_REQUEST_LIST_HEADER } from "../../../tables/utils/pullRequestTableHeaders";
-import { org } from "../../../configManager/parseConfig";
+import { FileConfigStore } from "../../../config/ConfigStore";
 
 export default function mergeRequestListProgram() {
     program
@@ -12,9 +12,10 @@ export default function mergeRequestListProgram() {
         .alias("p")
         .description("Get Merge Requests from a specific project")
         .action(async function(repo: string, state: string) {
+            const config = new FileConfigStore().readConfig();
             const pullRequestTable = createTable(PULL_REQUEST_LIST_HEADER);
             const pullRequestDetails = await GitlabMR.listMergeRequests(
-                org,
+                config.organization_username,
                 repo,
                 state
             );

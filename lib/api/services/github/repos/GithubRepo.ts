@@ -1,8 +1,10 @@
 import { BaseAPI } from "../../../BaseAPI";
+import { HttpClient } from "../../../httpClient";
+import { withLegacyProviderErrorHandling } from "../../../providerErrors";
 import validateSchema from "../../../commons/validateSchema";
 import { listUserRepositoriesSchema } from "../../../commons/schemas/repositoriesSchema/listUserRepositoriesSchema";
-import { org } from "../../../../configManager/parseConfig";
-import errorHandler from "../../../../tables/utils/errorHandler";
+import { org as configuredOrg } from "../../../../configManager/parseConfig";
+import { createGitHubAuthHeaders } from "../../../authHeaders";
 import {
     DataTable,
     GithubRepoCreateData,
@@ -19,22 +21,37 @@ import { repositoryDetailsToRow } from "../../../../tables/mappers/repositories"
 
 export class GithubRepo extends BaseAPI implements RepositoryProvider {
     private readonly userUrl: string;
+    private readonly client: HttpClient;
 
-    constructor(baseURL: string, timeout?: number) {
-        super(baseURL, timeout);
+    constructor(
+        baseURL: string,
+        timeout?: number,
+        private readonly orgName = configuredOrg,
+        token?: string,
+        client?: HttpClient
+    ) {
+        super(
+            baseURL,
+            timeout,
+            token === undefined ? undefined : createGitHubAuthHeaders(token)
+        );
+        this.client = client ?? this;
         this.userUrl = "https://api.github.com/user";
+    }
+
+    static fromHttpClient(orgName: string, client: HttpClient): GithubRepo {
+        return new GithubRepo("", undefined, orgName, undefined, client);
     }
 
     async getRepositoryDetails(
         repoName: string
     ): Promise<RepositoryDetails | undefined> {
         const userRepoUrl = `/${repoName}`;
-        const listRepositoriesResponse = await this.getRequest<unknown>(
-            userRepoUrl
-        ).catch((err: unknown) => {
-            errorHandler(this.getStatusCode(err), "listRepositories", repoName);
-            return undefined;
-        });
+        const listRepositoriesResponse = await withLegacyProviderErrorHandling(
+            this.client.get<unknown>(userRepoUrl),
+            { action: "listRepositories", resource: repoName },
+            undefined
+        );
         if (listRepositoriesResponse === undefined) {
             return undefined;
         }
@@ -61,13 +78,11 @@ export class GithubRepo extends BaseAPI implements RepositoryProvider {
         repoData: GithubRepoCreateData
     ): Promise<RepositoryDetails | undefined> {
         const createRepoURL = `${this.userUrl}/repos`;
-        const createRepositoryResponse = await this.postRequest<unknown>(
-            createRepoURL,
-            repoData
-        ).catch((err: unknown) => {
-            errorHandler(this.getStatusCode(err), "createRepository", "name");
-            return undefined;
-        });
+        const createRepositoryResponse = await withLegacyProviderErrorHandling(
+            this.client.post<unknown>(createRepoURL, repoData),
+            { action: "createRepository", resource: "name" },
+            undefined
+        );
         if (createRepositoryResponse === undefined) {
             return undefined;
         }
@@ -94,24 +109,20 @@ export class GithubRepo extends BaseAPI implements RepositoryProvider {
         repoName: string,
         action: Exclude<RepoUpdateAction, "enable">
     ): Promise<number | undefined> {
-        const starUrl = `${this.userUrl}/starred/${org}/${repoName}`;
+        const starUrl = `${this.userUrl}/starred/${this.orgName}/${repoName}`;
         let response: AxiosResponse<unknown> | undefined;
         if (action === "star") {
-            response = await this.putRequest<unknown>(starUrl).catch(
-                (err: unknown) => {
-                    errorHandler(
-                        this.getStatusCode(err),
-                        "star-repo",
-                        repoName
-                    );
-                    return undefined;
-                }
+            response = await withLegacyProviderErrorHandling(
+                this.client.put<unknown>(starUrl),
+                { action: "star-repo", resource: repoName },
+                undefined
             );
         } else {
-            await this.deleteRequest<unknown>(starUrl).catch((err: unknown) => {
-                errorHandler(this.getStatusCode(err), "unstar-repo", repoName);
-                return undefined;
-            });
+            await withLegacyProviderErrorHandling(
+                this.client.delete<unknown>(starUrl),
+                { action: "unstar-repo", resource: repoName },
+                undefined
+            );
         }
 
         return response === undefined ? undefined : response.status;
@@ -124,20 +135,13 @@ export class GithubRepo extends BaseAPI implements RepositoryProvider {
         const vulnerabilityUrl = `/${repoName}/vulnerability-alerts`;
         let response: AxiosResponse<unknown> | undefined;
         if (action === "enable") {
-            response = await this.putRequest<unknown>(
-                vulnerabilityUrl,
-                undefined,
-                {
+            response = await withLegacyProviderErrorHandling(
+                this.client.put<unknown>(vulnerabilityUrl, undefined, {
                     Accept: "application/vnd.github.dorian-preview+json",
-                }
-            ).catch((err: unknown) => {
-                errorHandler(
-                    this.getStatusCode(err),
-                    "enable-vulernability-scan",
-                    repoName
-                );
-                return undefined;
-            });
+                }),
+                { action: "enable-vulernability-scan", resource: repoName },
+                undefined
+            );
         }
 
         return response;

@@ -8,10 +8,11 @@ import {
     GitlabMergeRequestResponse,
     GitlabProjectResponse,
 } from "../../../../types";
+import { AuthHeaders } from "../../../authHeaders";
 
 export class GitlabMergeRequest extends BaseAPI {
-    constructor(baseURL: string, timeout?: number) {
-        super(baseURL, timeout);
+    constructor(baseURL: string, timeout?: number, headers?: AuthHeaders) {
+        super(baseURL, timeout, headers);
     }
     async listMergeRequests(
         org: string,

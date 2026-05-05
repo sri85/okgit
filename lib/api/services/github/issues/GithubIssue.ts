@@ -1,10 +1,11 @@
 import { BaseAPI } from "../../../BaseAPI";
+import { HttpClient } from "../../../httpClient";
+import { withLegacyProviderErrorHandling } from "../../../providerErrors";
 import validateSchema from "../../../commons/validateSchema";
 import { updateIssueSchema } from "../../../commons/schemas/issueSchema/updateIssueSchema";
 import { createIssueSchema } from "../../../commons/schemas/issueSchema/createIssueSchema";
 import { issueSchema } from "../../../commons/schemas/issueSchema/issueSchema";
 import { listIssuesSchema } from "../../../commons/schemas/issueSchema/listIssuesSchema";
-import errorHandler from "../../../../tables/utils/errorHandler";
 import {
     DataTable,
     GithubIssueResponse,
@@ -14,7 +15,8 @@ import { IssueDetails, IssueProvider } from "../../../../providers/contracts";
 import { mapGithubIssue } from "../../../../providers/github/mappers/issues";
 import { issueDetailsToRow } from "../../../../tables/mappers/issues";
 
-import { repo } from "../../../../configManager/parseConfig";
+import { repo as configuredRepo } from "../../../../configManager/parseConfig";
+import { createGitHubAuthHeaders } from "../../../authHeaders";
 
 type IssueUpdateData = string | string[];
 type IssueUpdatePayload =
@@ -22,24 +24,41 @@ type IssueUpdatePayload =
     | { assignees: string[] }
     | { state: string };
 
-export class GithubIssue extends BaseAPI implements IssueProvider {
-    constructor(baseURL: string, timeout?: number) {
-        super(baseURL, timeout);
+export class GithubIssue implements IssueProvider {
+    private readonly client: HttpClient;
+
+    constructor(
+        baseURL: string,
+        timeout?: number,
+        private readonly repoName = configuredRepo,
+        token?: string,
+        client?: HttpClient
+    ) {
+        this.client =
+            client ??
+            new BaseAPI(
+                baseURL,
+                timeout,
+                token === undefined ? undefined : createGitHubAuthHeaders(token)
+            );
     }
+
+    static fromHttpClient(repoName: string, client: HttpClient): GithubIssue {
+        return new GithubIssue("", undefined, repoName, undefined, client);
+    }
+
     async createIssue(issueTitle: string, issueBody: string): Promise<string> {
-        const createIssueUrl = `${repo}/issues`;
+        const createIssueUrl = `${this.repoName}/issues`;
         const issueData = {
             title: issueTitle,
             body: issueBody,
         };
         let result = "";
-        const createIssueResponse = await this.postRequest<unknown>(
-            createIssueUrl,
-            issueData
-        ).catch((err: unknown) => {
-            errorHandler(this.getStatusCode(err), "create-issue", repo);
-            return result;
-        });
+        const createIssueResponse = await withLegacyProviderErrorHandling(
+            this.client.post<unknown>(createIssueUrl, issueData),
+            { action: "create-issue", resource: this.repoName },
+            result
+        );
         if (
             validateSchema<GithubIssueResponse>(
                 createIssueResponse,
@@ -50,15 +69,15 @@ export class GithubIssue extends BaseAPI implements IssueProvider {
         }
         return result;
     }
+
     async getIssueDetails(
         issueId: number | string
     ): Promise<IssueDetails | undefined> {
-        const url = `/${repo}/issues/${issueId}`;
-        const getIssueResponse = await this.getRequest<unknown>(url).catch(
-            (err: unknown) => {
-                errorHandler(this.getStatusCode(err), "get-issue", repo);
-                return undefined;
-            }
+        const url = `/${this.repoName}/issues/${issueId}`;
+        const getIssueResponse = await withLegacyProviderErrorHandling(
+            this.client.get<unknown>(url),
+            { action: "get-issue", resource: this.repoName },
+            undefined
         );
         if (getIssueResponse === undefined) {
             return undefined;
@@ -80,14 +99,13 @@ export class GithubIssue extends BaseAPI implements IssueProvider {
     }
 
     async listIssues(): Promise<IssueDetails[]> {
-        const getIssuesURL = `/${repo}/issues`;
+        const getIssuesURL = `/${this.repoName}/issues`;
         const result: IssueDetails[] = [];
-        const getIssueResponse = await this.getRequest<unknown>(
-            getIssuesURL
-        ).catch((err: unknown) => {
-            errorHandler(this.getStatusCode(err), "get-issues", repo);
-            return result;
-        });
+        const getIssueResponse = await withLegacyProviderErrorHandling(
+            this.client.get<unknown>(getIssuesURL),
+            { action: "get-issues", resource: this.repoName },
+            result
+        );
         if (
             validateSchema<GithubIssueResponse[]>(
                 getIssueResponse,
@@ -111,7 +129,7 @@ export class GithubIssue extends BaseAPI implements IssueProvider {
         issue_number: number | string,
         data: IssueUpdateData
     ): Promise<string> {
-        const closeIssueUrl = `${repo}/issues/${issue_number}`;
+        const closeIssueUrl = `${this.repoName}/issues/${issue_number}`;
         let updateData: IssueUpdatePayload = { state: "" };
         switch (action.toLowerCase()) {
             case "label":
@@ -132,13 +150,11 @@ export class GithubIssue extends BaseAPI implements IssueProvider {
         }
 
         let result = "";
-        const response = await this.patchRequest<unknown>(
-            closeIssueUrl,
-            updateData
-        ).catch((err: unknown) => {
-            errorHandler(this.getStatusCode(err), action, repo);
-            return result;
-        });
+        const response = await withLegacyProviderErrorHandling(
+            this.client.patch<unknown>(closeIssueUrl, updateData),
+            { action, resource: this.repoName },
+            result
+        );
         if (
             validateSchema<GithubIssueResponse>(response, updateIssueSchema())
         ) {

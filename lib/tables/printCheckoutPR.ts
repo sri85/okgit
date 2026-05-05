@@ -1,6 +1,21 @@
-import shell from "shelljs";
+import { execFileAsync, ExecFileRunner } from "../utils/execFile";
+import { parsePositiveIntegerId } from "../utils/validators";
+
+export async function checkoutPullRequest(
+    prId: number | string,
+    runner: ExecFileRunner = execFileAsync
+): Promise<void> {
+    const normalizedPrId = parsePositiveIntegerId(prId);
+    const localBranch = `pr-${normalizedPrId}`;
+    await runner("git", [
+        "fetch",
+        "origin",
+        `pull/${normalizedPrId}/head:${localBranch}`,
+    ]);
+    await runner("git", ["checkout", localBranch]);
+}
+
 export async function printCheckoutPR(prId: number | string): Promise<void> {
-    shell.exec(`git fetch origin pull/${prId}/head:pr-${prId}`);
-    shell.exec(`git checkout pr-${prId}`);
-    shell.echo("Checked out the PR successfully");
+    await checkoutPullRequest(prId);
+    console.log("Checked out the PR successfully");
 }

@@ -1,7 +1,10 @@
 import moment from "moment";
-import { repo } from "../../../../configManager/parseConfig";
+import { repo as configuredRepo } from "../../../../configManager/parseConfig";
+import { createGitHubAuthHeaders } from "../../../authHeaders";
 
 import { BaseAPI } from "../../../BaseAPI";
+import { HttpClient } from "../../../httpClient";
+import { withLegacyProviderErrorHandling } from "../../../providerErrors";
 import validateSchema from "../../../commons/validateSchema";
 import { pullrequestListSchema } from "../../../commons/schemas/pullRequestSchema/pullrequestListSchema";
 import { pullRequestCommentsSchema } from "../../../commons/schemas/pullRequestSchema/pullRequestCommentsSchema";
@@ -10,7 +13,6 @@ import { pullRequestCommitsSchema } from "../../../commons/schemas/pullRequestSc
 import { pullRequestFilesSchema } from "../../../commons/schemas/pullRequestSchema/pullRequestFilesSchema";
 import { pullrequestUpdateSchema } from "../../../commons/schemas/pullRequestSchema/pullRequestUpdateStatus";
 import { pullRequestAddReviewersSchema } from "../../../commons/schemas/pullRequestSchema/pullRequestAddReviewersSchema";
-import errorHandler from "../../../../tables/utils/errorHandler";
 import {
     DataTable,
     GithubCreatePullRequestResponse,
@@ -47,8 +49,28 @@ import {
 } from "../../../../tables/mappers/pullRequests";
 
 export class GithubPullRequest extends BaseAPI implements PullRequestProvider {
-    constructor(baseURL: string, timeout?: number) {
-        super(baseURL, timeout);
+    private readonly client: HttpClient;
+
+    constructor(
+        baseURL: string,
+        timeout?: number,
+        private readonly repoName = configuredRepo,
+        token?: string,
+        client?: HttpClient
+    ) {
+        super(
+            baseURL,
+            timeout,
+            token === undefined ? undefined : createGitHubAuthHeaders(token)
+        );
+        this.client = client ?? this;
+    }
+
+    static fromHttpClient(
+        repoName: string,
+        client: HttpClient
+    ): GithubPullRequest {
+        return new GithubPullRequest("", undefined, repoName, undefined, client);
     }
 
     async createPullRequest(
@@ -63,13 +85,11 @@ export class GithubPullRequest extends BaseAPI implements PullRequestProvider {
             base: baseBranchName,
             body: body,
         };
-        const createRepositoryResponse = await this.postRequest<unknown>(
-            `/${repo}/pulls`,
-            prData
-        ).catch((err: unknown) => {
-            errorHandler(this.getStatusCode(err), "createPullRequest", repo);
-            return undefined;
-        });
+        const createRepositoryResponse = await withLegacyProviderErrorHandling(
+            this.client.post<unknown>(`/${this.repoName}/pulls`, prData),
+            { action: "createPullRequest", resource: this.repoName },
+            undefined
+        );
         if (
             typeof createRepositoryResponse !== "object" ||
             createRepositoryResponse === null ||
@@ -92,12 +112,11 @@ export class GithubPullRequest extends BaseAPI implements PullRequestProvider {
         const getPullRequestUrl = `/${repoName}/pulls?state=${pullRequestState}`;
 
         const pullRequests: PullRequestListItem[] = [];
-        const response = await this.getRequest<unknown>(
-            getPullRequestUrl
-        ).catch((err: unknown) => {
-            errorHandler(this.getStatusCode(err), "pullRequests", repo);
-            return pullRequests;
-        });
+        const response = await withLegacyProviderErrorHandling(
+            this.client.get<unknown>(getPullRequestUrl),
+            { action: "pullRequests", resource: this.repoName },
+            pullRequests
+        );
 
         if (
             validateSchema<GithubPullRequestListItem[]>(
@@ -140,12 +159,11 @@ export class GithubPullRequest extends BaseAPI implements PullRequestProvider {
         );
 
         const comments: PullRequestComment[] = [];
-        const response = await this.getRequest<unknown>(
-            pullRequestCommentsUrl
-        ).catch((err: unknown) => {
-            errorHandler(this.getStatusCode(err), "comments", repo);
-            return comments;
-        });
+        const response = await withLegacyProviderErrorHandling(
+            this.client.get<unknown>(pullRequestCommentsUrl),
+            { action: "comments", resource: this.repoName },
+            comments
+        );
         if (
             validateSchema<GithubPullRequestCommentResponse[]>(
                 response,
@@ -169,15 +187,10 @@ export class GithubPullRequest extends BaseAPI implements PullRequestProvider {
         id: number | string
     ): Promise<PullRequestSummary | undefined> {
         const url = this.createPullRequestURL(id);
-        const response = await this.getRequest<unknown>(url).catch(
-            (err: unknown) => {
-                errorHandler(
-                    this.getStatusCode(err),
-                    "PullRequestDetails",
-                    repo
-                );
-                return undefined;
-            }
+        const response = await withLegacyProviderErrorHandling(
+            this.client.get<unknown>(url),
+            { action: "PullRequestDetails", resource: this.repoName },
+            undefined
         );
         if (response === undefined) {
             return undefined;
@@ -204,14 +217,13 @@ export class GithubPullRequest extends BaseAPI implements PullRequestProvider {
     async listPullRequestCommits(
         id: number | string
     ): Promise<PullRequestCommit[]> {
-        const pullRequestCommentsUrl = `${repo}/pulls/${id}/commits`;
+        const pullRequestCommentsUrl = `${this.repoName}/pulls/${id}/commits`;
         const commits: PullRequestCommit[] = [];
-        const response = await this.getRequest<unknown>(
-            pullRequestCommentsUrl
-        ).catch((err: unknown) => {
-            errorHandler(this.getStatusCode(err), "commits", repo);
-            return commits;
-        });
+        const response = await withLegacyProviderErrorHandling(
+            this.client.get<unknown>(pullRequestCommentsUrl),
+            { action: "commits", resource: this.repoName },
+            commits
+        );
         if (
             validateSchema<GithubPullRequestCommitResponse[]>(
                 response,
@@ -231,14 +243,13 @@ export class GithubPullRequest extends BaseAPI implements PullRequestProvider {
     }
 
     async listPullRequestFiles(id: number | string): Promise<PullRequestFile[]> {
-        const pullRequestFilesUrl = `${repo}/pulls/${id}/files`;
+        const pullRequestFilesUrl = `${this.repoName}/pulls/${id}/files`;
         const files: PullRequestFile[] = [];
-        const response = await this.getRequest<unknown>(
-            pullRequestFilesUrl
-        ).catch((err: unknown) => {
-            errorHandler(this.getStatusCode(err), "pullRequestFiles", repo);
-            return files;
-        });
+        const response = await withLegacyProviderErrorHandling(
+            this.client.get<unknown>(pullRequestFilesUrl),
+            { action: "pullRequestFiles", resource: this.repoName },
+            files
+        );
         if (
             validateSchema<GithubPullRequestFileResponse[]>(
                 response,
@@ -263,15 +274,10 @@ export class GithubPullRequest extends BaseAPI implements PullRequestProvider {
         const url = this.createPullRequestURL(id);
 
         const data = { state: state };
-        const response = await this.patchRequest<unknown>(url, data).catch(
-            (err: unknown) => {
-                errorHandler(
-                    this.getStatusCode(err),
-                    "updatePullRequestStatus",
-                    repo
-                );
-                return "";
-            }
+        const response = await withLegacyProviderErrorHandling(
+            this.client.patch<unknown>(url, data),
+            { action: "updatePullRequestStatus", resource: this.repoName },
+            ""
         );
         if (
             validateSchema<GithubPullRequestUpdateResponse>(
@@ -287,18 +293,16 @@ export class GithubPullRequest extends BaseAPI implements PullRequestProvider {
         id: number | string,
         reviewerNames: string[]
     ): Promise<string[]> {
-        const addReviewersUrl = `/${repo}/pulls/${id}/requested_reviewers`;
+        const addReviewersUrl = `/${this.repoName}/pulls/${id}/requested_reviewers`;
         const result: string[] = [];
         const reviewerData = {
             reviewers: reviewerNames,
         };
-        const response = await this.postRequest<unknown>(
-            addReviewersUrl,
-            reviewerData
-        ).catch((err: unknown) => {
-            errorHandler(this.getStatusCode(err), "addReviewers", repo);
-            return result;
-        });
+        const response = await withLegacyProviderErrorHandling(
+            this.client.post<unknown>(addReviewersUrl, reviewerData),
+            { action: "addReviewers", resource: this.repoName },
+            result
+        );
         if (
             validateSchema<GithubReviewersResponse>(
                 response,
@@ -315,18 +319,16 @@ export class GithubPullRequest extends BaseAPI implements PullRequestProvider {
         pullRequestId: number | string,
         reviewerNames: string[]
     ): Promise<string[]> {
-        const removeReviewersUrl = `/${repo}/pulls/${pullRequestId}/requested_reviewers`;
+        const removeReviewersUrl = `/${this.repoName}/pulls/${pullRequestId}/requested_reviewers`;
         const resultsTable: string[] = [];
         const reviewerData = {
             reviewers: reviewerNames,
         };
-        const response = await this.deleteRequest<unknown>(
-            removeReviewersUrl,
-            reviewerData
-        ).catch((err: unknown) => {
-            errorHandler(this.getStatusCode(err), "removeReviewers", repo);
-            return resultsTable;
-        });
+        const response = await withLegacyProviderErrorHandling(
+            this.client.delete<unknown>(removeReviewersUrl, reviewerData),
+            { action: "removeReviewers", resource: this.repoName },
+            resultsTable
+        );
         if (
             validateSchema<GithubReviewersResponse>(
                 response,
@@ -342,15 +344,16 @@ export class GithubPullRequest extends BaseAPI implements PullRequestProvider {
     async mergePullRequest(
         pullRequestId: number | string
     ): Promise<PullRequestMergeResult | undefined> {
-        const mergePullRequestURL = `/${repo}/pulls/${pullRequestId}/merge`;
-        const response = await this.putRequest<GithubMergePullRequestResponse>(
-            mergePullRequestURL,
-            pullRequestId,
+        const mergePullRequestURL = `/${this.repoName}/pulls/${pullRequestId}/merge`;
+        const response = await withLegacyProviderErrorHandling(
+            this.client.put<GithubMergePullRequestResponse>(
+                mergePullRequestURL,
+                pullRequestId,
+                undefined
+            ),
+            { action: "mergePullRequest", resource: this.repoName },
             undefined
-        ).catch((err: unknown) => {
-            errorHandler(this.getStatusCode(err), "mergePullRequest", repo);
-            return undefined;
-        });
+        );
         if (response === undefined) {
             return undefined;
         }
@@ -362,9 +365,9 @@ export class GithubPullRequest extends BaseAPI implements PullRequestProvider {
 
     createPullRequestURL(id: number | string, prAttribute = ""): string {
         if (prAttribute !== "") {
-            return `/${repo}/pulls/${id}/${prAttribute}`;
+            return `/${this.repoName}/pulls/${id}/${prAttribute}`;
         }
-        return `/${repo}/pulls/${id}`;
+        return `/${this.repoName}/pulls/${id}`;
     }
     formatDate(dateString: string): string {
         return moment(dateString.split("T")[0], "YYYY-MM-DD").fromNow();

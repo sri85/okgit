@@ -1,4 +1,5 @@
-import { hosting_provider } from "../configManager/parseConfig";
+import { FileConfigStore, getDefaultConfig } from "../config/ConfigStore";
+import { OkgitConfig } from "../types";
 import { OkgitProvider } from "./contracts";
 import { createGithubProvider } from "./github/provider";
 
@@ -16,16 +17,29 @@ export function normalizeProviderName(
 }
 
 export function getConfiguredProvider(
-    providerName: string | undefined = hosting_provider
+    providerName: string | undefined,
+    config: OkgitConfig = getDefaultConfig()
 ): OkgitProvider {
     const provider = normalizeProviderName(providerName);
     switch (provider) {
         case "":
         case "github":
-            return createGithubProvider();
+            return createGithubProvider(config);
         default:
             throw new UnsupportedProviderError(provider);
     }
 }
 
-export const okgitProvider = getConfiguredProvider();
+export function getConfiguredProviderFromConfig(
+    config: OkgitConfig
+): OkgitProvider {
+    return getConfiguredProvider(config.hosting_provider_choice, config);
+}
+
+export function getConfiguredProviderFromStore(
+    configStore = new FileConfigStore()
+): OkgitProvider {
+    return getConfiguredProviderFromConfig(configStore.readConfig());
+}
+
+export const okgitProvider = getConfiguredProviderFromStore();

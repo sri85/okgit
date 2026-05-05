@@ -1,27 +1,27 @@
-import path from "path";
-import fs from "fs";
-import { OkgitConfig } from "../types";
+import {
+    FileConfigStore,
+    ConfigReadError,
+    ConfigValidationError,
+    getDefaultConfig,
+} from "../config/ConfigStore";
+import { getConfigToken } from "./tokenConfig";
 
-const homedir = require("os").homedir();
-const filePath = path.join(homedir, "/.git-cli/config.json");
 let repo: string;
 let org: string;
 let token: string;
 let hosting_provider: string | undefined;
 
-const defaultConfig: OkgitConfig = {
-    repo: "",
-    organization_username: "",
-    personnel_access_token: "",
-    hosting_provider_choice: "",
-};
-
-function readConfig(): OkgitConfig {
+function readLegacyConfig() {
     try {
-        const rawConfig = fs.readFileSync(filePath, "utf-8");
-        return JSON.parse(rawConfig) as OkgitConfig;
-    } catch {
-        return defaultConfig;
+        return new FileConfigStore().readConfig();
+    } catch (err) {
+        if (
+            err instanceof ConfigReadError ||
+            err instanceof ConfigValidationError
+        ) {
+            return getDefaultConfig();
+        }
+        throw err;
     }
 }
 
@@ -30,10 +30,10 @@ if (process.env.IS_TESTING === "TRUE") {
     org = "octo";
     token = "123456";
 } else {
-    const config = readConfig();
+    const config = readLegacyConfig();
     repo = config["repo"];
     org = config["organization_username"];
-    token = config["personnel_access_token"];
+    token = getConfigToken(config);
     hosting_provider = config["hosting_provider_choice"];
 }
 export { repo, org, token, hosting_provider };

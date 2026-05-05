@@ -2,91 +2,146 @@
 
 ![Build](https://github.com/sri85/okgit/workflows/Node.js%20CI/badge.svg?branch=master) [![Node version](https://img.shields.io/node/v/okgit.svg?style=flat)](http://nodejs.org/download/) [![NPM Version](https://badge.fury.io/js/esta.svg?style=flat)](https://npmjs.org/package/okgit)
 
-A cli tool for interacting with Github(Gitlab,Bitbucket coming soon). The cli tool aims to speed up the dev productivity by allowing devs to interact with Github/Bitbucket/Gitlab without having to leave their favorite commandline. The name is heavily inspired by voice assistant "Ok,Git".
+`okgit` is a command-line tool for working with hosted Git services from your terminal.
 
-# Mission 
-Aim of `okgit` is to make developers comfortable by reducing the times that developer needs to reach the mouse to interact with Github/Gitlab/Bitbucket.(atleast that's the hope )
+Current provider status:
 
-## Motivation
-Why `okgit`?
-Whilst there are tools out there to interact with **Github/Gitlab/Bitbucket**, `okgit` aims to be a single tool to interact with any of these services, without having to download or configure different tools .
-
-## Security
-`okgit` does not use /store the tokens , all the tokens that are used to continue to reside on the filesystem of your machine where `okgit` is installed.
+| Provider | Status |
+| --- | --- |
+| GitHub | Supported for pull requests, issues, and repository operations. |
+| GitLab | Partial legacy support for listing merge requests. |
+| Bitbucket | Not implemented yet. |
 
 ## Installation
-```
+
+```bash
 npm install okgit -g
 ```
-The above command installs `okgit`, globally . Couple more steps, hang in there .
+
+`okgit` requires Node.js 18 or newer.
 
 ## Configuration
-I know, you are excited to get your hands dirty with `okgit`, we will now proceed to configure the tool.
-okgit can be configured with one of the major cloud git providers
-1. Github
-2. Gitlab(Coming Soon)
-3. Bitbucket(Coming Soon)
 
-Run `okgit config`, this will ask series of questions for you to get started.
+Run:
 
+```bash
+okgit config
+```
 
-### Github
-In order to configure `okgit` with [Github](https://github.com/) , first step would be to create a token in Github.
-Open Github in web browser(for one last time 😜) , Go to **Settings -> Developer Settings -> Personal Access Token** and click on
-**Generate new token** Copy the token to a safe place(Please do not share the token with anyone else)
+The CLI prompts for:
 
- Now run `okgit config`
- [![okgit-config](https://asciinema.org/a/8rsGr8p3LCGN7RlOVfMdroKOd.svg)](https://asciinema.org/a/8rsGr8p3LCGN7RlOVfMdroKOd)
+- Hosting provider.
+- Access token.
+- Organization or username.
+- Repository.
+- Optional pull request template.
+- Optional issue template.
 
-## Features
-[![asciicast](https://asciinema.org/a/StSI8hmTuKP20rR57aWPDchb4.svg)](https://asciinema.org/a/StSI8hmTuKP20rR57aWPDchb4) 
-[![okgit create-pullrequest](https://asciinema.org/a/DTmeNPgxM75m7CriSxNhqPaxl.svg)](https://asciinema.org/a/DTmeNPgxM75m7CriSxNhqPaxl)
+Configuration is stored locally under `~/.git-cli/config.json`.
 
+To switch the configured repository later:
 
-## Features
-`okgit` allows us to interact with the cloud git providers(Github) features for now , without having to leave your terminal.
-### Help
-To view what ``okgit`` can do with pull requests just type 
+```bash
+okgit switchrepo owner/repo
+```
 
-````commandline
-okgit --help
- 
-````
-![Command Usage](./assets/okgit-help.png)
-### PullRequest
+To inspect the active config without printing tokens:
 
-````commandline
-okgit pr <id> --help
- 
-````
-![PR](./assets/okgit-pr.png)
+```bash
+okgit showConfig
+```
 
-### Issue
+## Security
 
-````commandline
-okgit issue --help
- 
-````
-![ISSUE](./assets/okgit-issue.png)
+`okgit` stores your access token locally under `~/.git-cli/config.json`. Treat this file as a secret.
 
-### Repo
+The CLI writes config files with restrictive permissions where supported by the operating system and redacts token values from normal config output.
 
-````commandline
-okgit repo --help
- 
-````
-![Repo](./assets/okgit-repo.png)
+For GitHub, prefer a fine-grained personal access token limited to the repositories you want to manage. Grant only the permissions needed for the commands you use:
 
+- Pull request permissions for PR commands.
+- Issue permissions for issue commands.
+- Repository metadata permissions for repository details.
+- Repository administration or security permissions only if enabling repository security settings.
 
-## Status
-Currently `okgit` is in **Beta** Status which means there are edges that still need to be polished and do not hesitate to raise [issue](https://github.com/sri85/okgit/issues/new) when you encounter them. And also if you have any cool features that you would like to see in `okgit` , feel free to raise a [feature-request](https://github.com/sri85/okgit/issues/new)
+## Commands
 
-### Running and building it locally
-1. Clone the repository.
-2. Install the dependencies using `npm install`.
-3. Build the app using `npm build`.
-4. Install the app locally using `npm install ./ -g`
+### Pull Requests
 
-### Releasing the new version
+```bash
+okgit fetchPR <repo> [state]
+okgit pull-requests <repo> [state]
+okgit createPR
+okgit create-pr
+okgit pr <id> --summary
+okgit pr <id> --comments
+okgit pr <id> --commits
+okgit pr <id> --files
+okgit pr <id> --state closed
+okgit pr <id> --addReviewers alice,bob
+okgit pr <id> --removeReviewers alice
+okgit pr <id> --merge
+okgit pr <id> --checkout
+okgit pr <id> --web
+```
 
-`okgit` uses `release-it` plugin to release. Use `npm run release` to make a release
+### Issues
+
+```bash
+okgit create-issue
+okgit list-issues
+okgit issues
+okgit issue <id> --details
+okgit issue <id> --state closed
+okgit issue <id> --assign alice,bob
+okgit issue <id> --label bug,docs
+okgit issue <id> --web
+```
+
+### Repositories
+
+```bash
+okgit repo-details <repo>
+okgit repository-details <repo>
+okgit create-repo
+okgit repo <repoName> --star
+okgit repo <repoName> --unstar
+okgit repo <repoName> --enableScan
+okgit openRepo
+```
+
+### GitLab Legacy
+
+```bash
+okgit fetchMR <repo> <state>
+```
+
+GitLab support is not yet wired into the provider-first architecture and should be treated as partial.
+
+## Development
+
+```bash
+npm install
+npm run typecheck
+npm test
+npm run lint
+npm run build
+```
+
+The codebase is TypeScript and compiles to `dist`. The published binary points to `dist/cli.js`.
+
+Architecture notes are in [ARCHITECTURE.md](./ARCHITECTURE.md), and contribution guidance is in [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+## Project Status
+
+`okgit` is being prepared for broader open-source contribution. The current refactor direction is provider-first:
+
+```text
+CLI command -> use case -> provider contract -> provider adapter -> mapper -> renderer
+```
+
+Backward-compatible command names are kept while cleaner aliases are introduced.
+
+## Release
+
+The release process is not automated yet. Before publishing a new version, run the full validation suite and update release notes with user-facing command or behavior changes.

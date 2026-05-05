@@ -10,22 +10,8 @@
     "dist",
     "scripts"
   ],
-  "lint-staged": {
-    "*.{js,jsx}": [
-      "npm run lint",
-      "eslint --fix",
-      "prettier --write",
-      "npm run test"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
-  },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "lint": "eslint \"{lib,okgit,tests,integration}/**/*.ts\"",
@@ -34,7 +20,6 @@
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "test": "cross-env IS_TESTING=TRUE TS_NODE_TRANSPILE_ONLY=0 NO_COLOR= mocha --exclude=integration/*.spec.ts --require ts-node/register tests/unit/*.spec.ts",
     "integration": "cross-env-shell IS_TESTING='' mocha --require ts-node/register integration/*.spec.ts --timeout=6000",
-    "docs": "jsdoc2md lib -d docs",
     "postinstall": "sh scripts/postinstall.sh",
     "preuninstall": "sh scripts/uninstall.sh"
   },
@@ -50,12 +35,6 @@
   "dependencies": {
     "@hapi/joi": "^17.1.0",
     "axios": "^0.21.1",
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-eslint": "^10.0.3",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-latest": "^6.24.1",
-    "babel-register": "^6.26.0",
     "cli-color": "^2.0.0",
     "cli-table": "^0.3.1",
     "commander": "4.1.0",
